@@ -1,50 +1,41 @@
 package com.tutorfinder.model;
 
 public class Post {
-    private static int count = 0; // Biến static để đếm số bài đăng toàn hệ thống
+    private static int count = 0;
     private String postId;
     private String parentId;
     private String subject;
-    private int studentAge;
-    private String address;
-    private int districtId;      // Lưu từ 1-12 tương ứng 12 quận Hà Nội
-    private double feePerLesson; // Học phí 1 buổi
-    private int sessionsPerWeek; // Số buổi/tuần
-    private String schedule;     // String tự do: "T2, T4 chiều"
-    private String duration;     // "3 tháng", "1 học kỳ"...
-    private String status;       // "OPEN" hoặc "CLOSED"
+    private int studentCount;    // Đổi từ age sang số lượng học viên
+    private int districtId;
+    private double feePerLesson;
+    private int sessionsPerWeek;
+    private String timeNote;     // Gộp thời gian rảnh và thời gian học vào đây
+    private String status;
 
-    public Post(String parentId, String subject, int studentAge, String address,
+    public Post(String parentId, String subject, int studentCount,
                 int districtId, double feePerLesson, int sessionsPerWeek,
-                String schedule, String duration) {
-        this.postId = String.valueOf(++count); // Tự động tăng ID từ 1, 2, 3...
+                String timeNote) {
+        this.postId = String.valueOf(++count);
         this.parentId = parentId;
         this.subject = subject;
-        this.studentAge = studentAge;
-        this.address = address;
+        this.studentCount = studentCount;
         this.districtId = districtId;
         this.feePerLesson = feePerLesson;
         this.sessionsPerWeek = sessionsPerWeek;
-        this.schedule = schedule;
-        this.duration = duration;
-        this.status = "OPEN"; // Mặc định bài mới đăng là OPEN
+        this.timeNote = timeNote;
+        this.status = "OPEN";
     }
 
-    // Getters
-    public String getPostId() { return postId; }
-    public String getParentId() { return parentId; }
-    public String getSubject() { return subject; }
-    public int getDistrictId() { return districtId; }
-    public double getFeePerLesson() { return feePerLesson; }
-    public String getStatus() { return status; }
-
-    // Setters
-    public void setStatus(String status) { this.status = status; }
-
-    // Hàm hiển thị nhanh thông tin bài đăng để Gia sư xem
+    // Cập nhật lại hàm hiển thị cho gọn
     public void displayPost() {
-        System.out.println("[" + postId + "] Môn: " + subject + " - Học phí: " + feePerLesson + "đ/buổi");
-        System.out.println("    Địa điểm: " + address + " (Quận " + districtId + ")");
-        System.out.println("    Lịch học: " + sessionsPerWeek + " buổi/tuần (" + schedule + ")");
+        System.out.println("[" + postId + "] Môn: " + subject + " (" + studentCount + " học viên)");
+        System.out.println("    Khu vực: Quận " + districtId + " - Học phí: " + feePerLesson + "đ/buổi");
+        System.out.println("    Lịch trình: " + sessionsPerWeek + " buổi/tuần. Ghi chú: " + timeNote);
+        System.out.println("    Trạng thái: " + status);
+        System.out.println("--------------------------------------------------");
     }
+
+    // Đừng quên các Getter nếu cần thiết ở các bước sau
+    public String getPostId() { return postId; }
+    public String getStatus() { return status; }
 }

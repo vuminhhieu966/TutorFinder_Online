@@ -23,6 +23,6 @@ public class DataService {
         allUsers.add(new Parent("P01", "phuhuynha", "123", "Tran Thi B", "0987654321"));
 
         // Tạo 1 bài đăng mẫu (Post)
-        activePosts.add(new Post("P01", "Toan", 15, "So 1 Cau Giay", 5, 200000, 2, "T2-T6", "3 thang"));
+        activePosts.add(new Post("P01", "Toán", 1, 5, 200000, 2, "T2-T6, học 3 tháng"));
     }
 }
