@@ -1,21 +1,19 @@
 package com.tutorfinder.model;
 
 public class Post {
-    private static int count = 0;
+    private static int autoId = 0; // Biến tĩnh để tự động tăng ID
     private String postId;
     private String parentId;
     private String subject;
-    private int studentCount;    // Đổi từ age sang số lượng học viên
+    private int studentCount;
     private int districtId;
     private double feePerLesson;
     private int sessionsPerWeek;
-    private String timeNote;     // Gộp thời gian rảnh và thời gian học vào đây
-    private String status;
+    private String timeNote;
+    private String status; // OPEN (Đang tìm), CLOSED (Đã có người nhận)
 
-    public Post(String parentId, String subject, int studentCount,
-                int districtId, double feePerLesson, int sessionsPerWeek,
-                String timeNote) {
-        this.postId = String.valueOf(++count);
+    public Post(String parentId, String subject, int studentCount, int districtId, double feePerLesson, int sessionsPerWeek, String timeNote) {
+        this.postId = String.valueOf(++autoId); // Tự động tạo ID 1, 2, 3...
         this.parentId = parentId;
         this.subject = subject;
         this.studentCount = studentCount;
@@ -26,20 +24,19 @@ public class Post {
         this.status = "OPEN";
     }
 
-    // Cập nhật lại hàm hiển thị cho gọn
+    // Hàm in thông tin bài đăng ra màn hình cho đẹp
     public void displayPost() {
-        System.out.println("[" + postId + "] Môn: " + subject + " (" + studentCount + " học viên)");
-        System.out.println("    Khu vực: Quận " + districtId + " - Học phí: " + feePerLesson + "đ/buổi");
-        System.out.println("    Lịch trình: " + sessionsPerWeek + " buổi/tuần. Ghi chú: " + timeNote);
-        System.out.println("    Trạng thái: " + status);
+        System.out.println("Mã lớp: [" + postId + "] | Môn: " + subject);
+        System.out.println(" + Khu vực: Quận " + districtId + " | Học viên: " + studentCount);
+        System.out.println(" + Học phí: " + feePerLesson + "đ/buổi | Lịch: " + sessionsPerWeek + " buổi/tuần");
+        System.out.println(" + Ghi chú: " + timeNote);
         System.out.println("--------------------------------------------------");
     }
 
-    // Đừng quên các Getter nếu cần thiết ở các bước sau
+    // Getters
     public String getPostId() { return postId; }
     public String getStatus() { return status; }
-    public int getDistrictId() {return districtId;}
-    public String getSubject() {return subject;}
-    public double getFeePerLesson() {return feePerLesson;}
-    public void setStatus( String status) {this.status = status;}
+    public void setStatus(String status) { this.status = status; }
+    public double getFeePerLesson() { return feePerLesson; }
+    public int getDistrictId() { return districtId; }
 }

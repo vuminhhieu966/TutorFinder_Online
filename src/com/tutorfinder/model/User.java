@@ -1,34 +1,33 @@
 package com.tutorfinder.model;
 
+// Sử dụng abstract để không cho phép tạo đối tượng "User" chung chung
 public abstract class User {
     private String id;
     private String username;
     private String password;
     private String fullName;
-    private String phoneNumber;
-    private String role; // Để phân biệt: "PARENT", "TUTOR", "ADMIN"
+    private String phone;
+    private String role; // ADMIN, PARENT, hoặc TUTOR
 
-    // Constructor: Hàm khởi tạo để tạo ra một User mới
-    public User(String id, String username, String password, String fullName, String phoneNumber, String role) {
+    // Constructor để các lớp con gọi tới (Super)
+    public User(String id, String username, String password, String fullName, String phone, String role) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.fullName = fullName;
-        this.phoneNumber = phoneNumber;
+        this.phone = phone;
         this.role = role;
     }
 
-    // Getter: Để các lớp khác có thể lấy thông tin (vì thuộc tính đang để private - tính Đóng gói)
-    public String getId() { return id; }
+    // Phương thức trừu tượng: Mỗi loại User sẽ có cách hiện Menu khác nhau
+    public abstract void displayMenu();
+
+    // Các Getter và Setter (Encapsulation - Đóng gói)
     public String getUsername() { return username; }
     public String getPassword() { return password; }
     public String getFullName() { return fullName; }
-    public String getPhoneNumber() { return phoneNumber; }
     public String getRole() { return role; }
+    public String getId() { return id; }
 
-    // Setter: Cho phép đổi mật khẩu
     public void setPassword(String password) { this.password = password; }
-
-    // Phương thức trừu tượng: Ép các lớp con sau này phải có hàm hiển thị Menu riêng
-    public abstract void displayMenu();
 }
