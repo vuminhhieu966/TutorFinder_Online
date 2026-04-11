@@ -38,4 +38,6 @@ public class Post {
     // Đừng quên các Getter nếu cần thiết ở các bước sau
     public String getPostId() { return postId; }
     public String getStatus() { return status; }
+    public int getDistrictId() {return districtId;}
+    public String getSubject() {return subject;}
 }

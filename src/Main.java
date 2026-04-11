@@ -2,6 +2,7 @@ import com.tutorfinder.model.*;
 import com.tutorfinder.service.DataService;
 import com.tutorfinder.service.ParentService;
 import java.util.Scanner;
+import com.tutorfinder.service.TutorService;
 
 public class Main {
     public static void main(String[] args) {
@@ -97,7 +98,26 @@ public class Main {
                 break;
 
             case "TUTOR":
-                System.out.println("Tính năng cho Gia sư đang được phát triển...");
+                if (choice == 1) {
+                    // Mục 1 trong Menu Tutor: Tìm lớp học
+                    System.out.println("1. Xem tất cả");
+                    System.out.println("2. Tìm theo quận");
+                    System.out.print("Lựa chọn: ");
+                    int searchChoice = Integer.parseInt(sc.nextLine());
+
+                    if (searchChoice == 1) {
+                        TutorService.showAllPosts();
+                    } else if (searchChoice == 2) {
+                        TutorService.searchByDistrict(sc);
+                    }
+                } else if (choice == 2) {
+                    // Lựa chọn số 2 trong Menu Gia sư là Nạp tiền
+                    // Chúng ta ép kiểu (cast) từ User sang Tutor để truy cập được vào Ví tiền
+                    TutorService.depositMoney(sc, (Tutor) user);
+
+                } else {
+                    System.out.println("Tính năng đang phát triển...");
+                }
                 break;
 
             case "ADMIN":
