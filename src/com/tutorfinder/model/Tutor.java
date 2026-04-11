@@ -1,4 +1,6 @@
 package com.tutorfinder.model;
+import java.util.Scanner;
+import com.tutorfinder.service.DataService;
 
 public class Tutor extends User {
     private String subject;     // Môn học thế mạnh
@@ -25,6 +27,8 @@ public class Tutor extends User {
 
     public String getSubject() { return subject; }
     public String getArea() { return area; }
+
+
 
     @Override
     public void displayMenu() {

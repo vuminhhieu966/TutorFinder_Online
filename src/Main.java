@@ -115,8 +115,8 @@ public class Main {
                     // Chúng ta ép kiểu (cast) từ User sang Tutor để truy cập được vào Ví tiền
                     TutorService.depositMoney(sc, (Tutor) user);
 
-                } else {
-                    System.out.println("Tính năng đang phát triển...");
+                } else if (choice == 3) { // THÊM MỚI Ở ĐÂY
+                    TutorService.applyPost(sc, (Tutor) user);
                 }
                 break;
 

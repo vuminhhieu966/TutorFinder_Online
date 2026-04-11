@@ -40,4 +40,6 @@ public class Post {
     public String getStatus() { return status; }
     public int getDistrictId() {return districtId;}
     public String getSubject() {return subject;}
+    public double getFeePerLesson() {return feePerLesson;}
+    public void setStatus( String status) {this.status = status;}
 }

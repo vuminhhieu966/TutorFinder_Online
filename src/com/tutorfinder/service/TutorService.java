@@ -53,4 +53,38 @@ public class TutorService {
             System.out.println("❌ Vui lòng nhập số tiền hợp lệ (chỉ nhập số)!");
         }
     }
+    // hàm đăng kí nhận lớp
+    public static void applyPost(Scanner sc, Tutor tutor) {
+        System.out.print("\nNhập mã bài đăng (ID) bạn muốn nhận: ");
+        String id = sc.nextLine();
+        Post foundPost = null;
+
+        // 1. Tìm bài đăng theo ID
+        for (Post p : DataService.activePosts) {
+            if (p.getPostId().equals(id) && p.getStatus().equals("OPEN")) {
+                foundPost = p;
+                break;
+            }
+        }
+
+        if (foundPost == null) {
+            System.out.println("❌ Không tìm thấy bài đăng hoặc bài đã có người nhận!");
+            return;
+        }
+
+        // 2. Tính phí nhận lớp (2 buổi)
+        double feeRequired = foundPost.getFeePerLesson() * 2;
+        System.out.println("Lớp này yêu cầu phí nhận lớp là: " + feeRequired + " VNĐ");
+        System.out.println("Số dư ví hiện tại của bạn: " + tutor.getBalance() + " VNĐ");
+
+        // 3. Kiểm tra ví và trừ tiền
+        if (tutor.getBalance() >= feeRequired) {
+            tutor.setBalance(tutor.getBalance() - feeRequired);
+            foundPost.setStatus("CLOSED"); // Chốt lớp, không cho ai thấy nữa
+            System.out.println("✅ CHÚC MỪNG! Bạn đã nhận lớp thành công.");
+            System.out.println("Số dư còn lại: " + tutor.getBalance() + " VNĐ");
+        } else {
+            System.out.println("❌ Tài khoản không đủ tiền! Vui lòng nạp thêm tối thiểu " + (feeRequired - tutor.getBalance()) + " VNĐ.");
+        }
+    }
 }
