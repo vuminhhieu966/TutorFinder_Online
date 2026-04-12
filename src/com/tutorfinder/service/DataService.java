@@ -1,31 +1,56 @@
 package com.tutorfinder.service;
 
 import com.tutorfinder.model.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
 public class DataService {
-    // Danh sách lưu trữ toàn bộ người dùng (Admin, Parent, Tutor)
     public static List<User> allUsers = new ArrayList<>();
-
-    // Danh sách lưu trữ toàn bộ các bài đăng tìm gia sư
     public static List<Post> activePosts = new ArrayList<>();
+    public static List<Complaint> allComplaints = new ArrayList<>();
+    public static List<Enrollment> allEnrollments = new ArrayList<>();
+    public static double totalRevenue = 0.0;
 
-    // Hàm khởi tạo dữ liệu mẫu để chúng ta không phải đăng ký lại mỗi khi chạy app
-    public static void initData() {
-        // Tạo Admin mẫu
-        allUsers.add(new Admin("A01", "admin", "123", "Quản trị viên", "0912345678", "ADMIN"));
+    private static final String FILE_NAME = "tutor_system.dat";
 
-        // Tạo Phụ huynh mẫu
-        allUsers.add(new Parent("P01", "phuhuynha", "123", "Nguyễn Văn A", "0988888888", "PARENT"));
+    // HÀM LƯU DỮ LIỆU XUỐNG FILE
+    public static void saveData() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("users", allUsers);
+            data.put("posts", activePosts);
+            data.put("complaints", allComplaints);
+            data.put("enrollments", allEnrollments);
+            data.put("revenue", totalRevenue);
+            oos.writeObject(data);
+        } catch (IOException e) {
+            System.out.println("❌ Lỗi ghi file: " + e.getMessage());
+        }
+    }
 
-        // Tạo Gia sư mẫu (Đã được duyệt sẵn)
-        Tutor t1 = new Tutor("T01", "giasua", "123", "Trần Thị B", "0977777777", "TUTOR", "Toán học", "Cầu Giấy");
-        t1.setApproved(true);
-        t1.setBalance(500000); // Cho sẵn 500k để test
-        allUsers.add(t1);
+    // HÀM ĐỌC DỮ LIỆU TỪ FILE (Đồng bộ Console)
+    @SuppressWarnings("unchecked")
+    public static void loadData() {
+        File f = new File(FILE_NAME);
+        if (!f.exists()) {
+            initAdmin();
+            return;
+        }
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_NAME))) {
+            Map<String, Object> data = (Map<String, Object>) ois.readObject();
+            allUsers = (List<User>) data.get("users");
+            activePosts = (List<Post>) data.get("posts");
+            allComplaints = (List<Complaint>) data.get("complaints");
+            allEnrollments = (List<Enrollment>) data.get("enrollments");
+            totalRevenue = (Double) data.get("revenue");
+        } catch (Exception e) {
+            initAdmin();
+        }
+    }
 
-        // Tạo bài đăng mẫu
-        activePosts.add(new Post("P01", "Tiếng Anh lớp 10", 1, 5, 250000, 2, "Học tối T2, T4"));
+    private static void initAdmin() {
+        allUsers.clear();
+        allUsers.add(new Admin("A01", "admin", "123", "Quản trị viên", "000", "ADMIN"));
+        saveData();
     }
 }

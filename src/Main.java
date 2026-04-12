@@ -1,126 +1,143 @@
+package com.tutorfinder;
+
 import com.tutorfinder.model.*;
 import com.tutorfinder.service.*;
 import java.util.Scanner;
 
 public class Main {
+    private static Scanner sc = new Scanner(System.in);
+
     public static void main(String[] args) {
-        // 1. Khởi tạo dữ liệu mẫu từ DataService
-        DataService.initData();
-        Scanner sc = new Scanner(System.in);
-
+        DataService.loadData();
         while (true) {
-            System.out.println("\n==============================================");
-            System.out.println("     HỆ THỐNG KẾT NỐI GIA SƯ TUTORFINDER");
-            System.out.println("==============================================");
-            System.out.println("1. Đăng nhập");
-            System.out.println("2. Đăng ký thành viên mới");
-            System.out.println("0. Thoát");
-            System.out.print("Lựa chọn của bạn: ");
+            DataService.loadData();
+            System.out.println("\n--- CHƯƠNG TRÌNH GIA SƯ HÀ NỘI ---");
+            System.out.println("1. Đăng nhập | 2. Đăng ký | 0. Thoát");
+            System.out.print("➤ Chọn: ");
+            String choice = sc.nextLine();
+            if (choice.equals("0")) break;
 
-            try {
-                int choice = Integer.parseInt(sc.nextLine());
-
-                if (choice == 1) {
-                    handleLogin(sc);
-                } else if (choice == 2) {
-                    handleRegister(sc);
-                } else if (choice == 0) {
-                    System.out.println("Cảm ơn bạn đã sử dụng TutorFinder. Tạm biệt!");
-                    break;
-                }
-            } catch (Exception e) {
-                System.out.println("Lỗi: Vui lòng nhập đúng định dạng số!");
-            }
+            if (choice.equals("1")) handleLogin();
+            else if (choice.equals("2")) handleRegister();
         }
     }
 
-    // --- LOGIC ĐĂNG KÝ ---
-    public static void handleRegister(Scanner sc) {
-        System.out.println("\n--- ĐĂNG KÝ TÀI KHOẢN ---");
-        System.out.println("1. Bạn là Phụ huynh | 2. Bạn là Gia sư");
-        System.out.print("Lựa chọn: ");
-        int type = Integer.parseInt(sc.nextLine());
+    private static void handleLogin() {
+        // QUAN TRỌNG: Cập nhật dữ liệu từ file trước khi kiểm tra đăng nhập
+        DataService.loadData();
 
-        System.out.print("Username mới: ");
-        String user = sc.nextLine();
-        System.out.print("Password: ");
-        String pass = sc.nextLine();
-        System.out.print("Họ và tên: ");
-        String name = sc.nextLine();
-        System.out.print("Số điện thoại: ");
-        String phone = sc.nextLine();
+        System.out.println("\n--- ĐĂNG NHẬP ---");
+        System.out.print("Username: "); String user = sc.nextLine().trim();
+        System.out.print("Password: "); String pass = sc.nextLine().trim();
 
-        String id = "U" + (DataService.allUsers.size() + 1);
-
-        if (type == 1) {
-            DataService.allUsers.add(new Parent(id, user, pass, name, phone, "PARENT"));
-            System.out.println("✅ Đăng ký Phụ huynh thành công!");
-        } else {
-            System.out.print("Môn học sở trường: ");
-            String sub = sc.nextLine();
-            System.out.print("Khu vực dạy (Quận): ");
-            String area = sc.nextLine();
-            DataService.allUsers.add(new Tutor(id, user, pass, name, phone, "TUTOR", sub, area));
-            System.out.println("✅ Đăng ký Gia sư thành công! (Chờ Admin duyệt)");
-        }
-    }
-
-    // --- LOGIC ĐĂNG NHẬP & ĐIỀU HƯỚNG ---
-    public static void handleLogin(Scanner sc) {
-        System.out.print("\nUsername: ");
-        String user = sc.nextLine();
-        System.out.print("Password: ");
-        String pass = sc.nextLine();
-
-        User loggedInUser = null;
+        User current = null;
         for (User u : DataService.allUsers) {
-            if (u.getUsername().equals(user) && u.getPassword().equals(pass)) {
-                loggedInUser = u;
+            // So sánh username không phân biệt hoa thường
+            if (u.getUsername().equalsIgnoreCase(user) && u.getPassword().equals(pass)) {
+                current = u;
                 break;
             }
         }
 
-        if (loggedInUser != null) {
-            System.out.println("✅ Đăng nhập thành công! Chào " + loggedInUser.getFullName());
-
-            boolean session = true;
-            while (session) {
-                loggedInUser.displayMenu(); // Đa hình: Gọi menu tương ứng Role
-                System.out.print("Lựa chọn tính năng (0 để đăng xuất): ");
-                int choice = Integer.parseInt(sc.nextLine());
-
-                if (choice == 0) {
-                    session = false;
-                } else {
-                    executeAction(sc, loggedInUser, choice);
-                }
-            }
+        if (current != null) {
+            System.out.println("✅ Đăng nhập thành công! Chào " + current.getFullName());
+            session(current);
         } else {
             System.out.println("❌ Sai tài khoản hoặc mật khẩu!");
         }
     }
 
-    // --- THỰC THI HÀNH ĐỘNG THEO VAI TRÒ ---
-    public static void executeAction(Scanner sc, User user, int choice) {
-        if (user instanceof Parent) {
-            if (choice == 1) System.out.println("Tính năng xem lịch sử đang cập nhật...");
-            else if (choice == 2) ParentService.createPost(sc, user.getId());
-        }
-        else if (user instanceof Tutor) {
-            Tutor t = (Tutor) user;
-            if (choice == 1) {
-                System.out.println("1. Xem tất cả | 2. Tìm theo quận");
-                int sub = Integer.parseInt(sc.nextLine());
-                if (sub == 1) TutorService.showAllPosts();
-                else TutorService.searchByDistrict(sc);
+    private static void session(User user) {
+        while (true) {
+            // Luôn làm mới dữ liệu hệ thống từ file
+            DataService.loadData();
+
+            // Đồng bộ đối tượng user hiện tại với dữ liệu vừa nạp từ file
+            for (User updatedUser : DataService.allUsers) {
+                if (updatedUser.getId().equals(user.getId())) {
+                    user = updatedUser;
+                    break;
+                }
             }
-            else if (choice == 2) TutorService.depositMoney(sc, t);
-            else if (choice == 3) TutorService.showTutorProfile(t);
-            else if (choice == 4) TutorService.applyPost(sc, t);
+
+            user.displayMenu();
+            System.out.print("➤ Chọn: ");
+            String opt = sc.nextLine();
+
+            if (user.isExit(opt)) {
+                DataService.saveData(); // Lưu trước khi thoát phiên
+                break;
+            }
+
+            execute(user, opt);
+
+            // Lưu lại sau mỗi hành động thực thi thành công
+            DataService.saveData();
         }
-        else if (user instanceof Admin) {
-            if (choice == 1) AdminService.approveTutors(sc);
-            else System.out.println("Tính năng đang cập nhật...");
+    }
+
+    private static void execute(User u, String opt) {
+        try {
+            int c = Integer.parseInt(opt);
+            if (u instanceof Parent p) {
+                switch (c) {
+                    case 1 -> ParentService.searchAndRequest(sc, p);
+                    case 2 -> ParentService.createPost(sc, p.getId());
+                    case 3 -> ParentService.managePosts(sc, p);
+                    case 5 -> ParentService.classManagement(sc, p);
+                }
+            } else if (u instanceof Tutor t) {
+                switch (c) {
+                    case 1 -> TutorService.searchAndApply(sc, t);
+                    case 2 -> TutorService.manageWallet(sc, t);
+                    case 3 -> TutorService.teachingManagement(sc, t);
+                    case 4 -> TutorService.handleInvitations(sc, t);
+                }
+            } else if (u instanceof Admin a) {
+                switch (c) {
+                    case 1 -> AdminService.manageTutors(sc, a);
+                    case 2 -> AdminService.resolveComplaints(sc, a);
+                    case 3 -> AdminService.showRevenue();
+                }
+            }
+        } catch (Exception e) { System.out.println("❌ Lỗi: " + e.getMessage()); }
+    }
+
+    private static void handleRegister() {
+        // Nạp dữ liệu để kiểm tra trùng lặp username
+        DataService.loadData();
+
+        System.out.println("\n--- ĐĂNG KÝ MỚI ---");
+        System.out.print("1. Phụ huynh | 2. Gia sư: ");
+        String role = sc.nextLine();
+        System.out.print("Username: "); String u = sc.nextLine().trim();
+
+        // Kiểm tra username tồn tại
+        for (User existing : DataService.allUsers) {
+            if (existing.getUsername().equalsIgnoreCase(u)) {
+                System.out.println("❌ Tên đăng nhập đã tồn tại!");
+                return;
+            }
         }
+
+        System.out.print("Pass: "); String p = sc.nextLine();
+        System.out.print("Tên: "); String n = sc.nextLine();
+        System.out.print("SĐT: "); String ph = sc.nextLine();
+
+        String id = "U" + System.currentTimeMillis();
+        User newUser;
+        if (role.equals("1")) {
+            newUser = new Parent(id, u, p, n, ph, "PARENT");
+        } else {
+            System.out.print("Môn: "); String sub = sc.nextLine();
+            System.out.print("Quận: "); String ar = sc.nextLine();
+            newUser = new Tutor(id, u, p, n, ph, "TUTOR", sub, ar);
+        }
+
+        DataService.allUsers.add(newUser);
+
+        // QUAN TRỌNG: Lưu xuống file ngay để các cửa sổ khác có thể thấy
+        DataService.saveData();
+        System.out.println("✅ Đăng ký thành công! Bạn có thể đăng nhập ngay.");
     }
 }
