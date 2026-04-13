@@ -4,26 +4,22 @@ import java.io.Serializable;
 
 public class Complaint implements Serializable {
     private static final long serialVersionUID = 1L;
+    private String id, parentId, tutorId, courseId, reason;
+    private double amountToRefund;
+    private int status; // 0: Chờ xử lý, 1: Đã hoàn tiền, -1: Bác bỏ
 
-    private String complaintId; // Mã đơn (cp1, cp2...)
-    private String senderId;    // ID người khiếu nại
-    private String classId;     // Khiếu nại lớp nào
-    private String content;     // Nội dung khiếu nại
-    private String status;      // "PENDING" (Chờ xử lý), "RESOLVED" (Đã xong), "REJECTED" (Bác bỏ)
-
-    public Complaint(String complaintId, String senderId, String classId, String content) {
-        this.complaintId = complaintId;
-        this.senderId = senderId;
-        this.classId = classId;
-        this.content = content;
-        this.status = "PENDING";
+    public Complaint(String id, String parentId, String tutorId, String courseId, String reason, double amountToRefund) {
+        this.id = id; this.parentId = parentId; this.tutorId = tutorId;
+        this.courseId = courseId; this.reason = reason; this.amountToRefund = amountToRefund;
+        this.status = 0;
     }
 
-    // Getters & Setters
-    public String getComplaintId() { return complaintId; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public String getSenderId() { return senderId; }
-    public String getClassId() { return classId; }
-    public String getContent() { return content; }
+    public String getId() { return id; }
+    public String getParentId() { return parentId; }
+    public String getTutorId() { return tutorId; }
+    public String getCourseId() { return courseId; }
+    public String getReason() { return reason; }
+    public double getAmountToRefund() { return amountToRefund; }
+    public int getStatus() { return status; }
+    public void setStatus(int status) { this.status = status; }
 }
