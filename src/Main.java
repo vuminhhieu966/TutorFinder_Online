@@ -8,136 +8,170 @@ public class Main {
     private static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
-        DataService.loadData();
-        while (true) {
-            DataService.loadData();
-            System.out.println("\n--- CHƯƠNG TRÌNH GIA SƯ HÀ NỘI ---");
-            System.out.println("1. Đăng nhập | 2. Đăng ký | 0. Thoát");
-            System.out.print("➤ Chọn: ");
-            String choice = sc.nextLine();
-            if (choice.equals("0")) break;
-
-            if (choice.equals("1")) handleLogin();
-            else if (choice.equals("2")) handleRegister();
-        }
-    }
-
-    private static void handleLogin() {
-        // QUAN TRỌNG: Cập nhật dữ liệu từ file trước khi kiểm tra đăng nhập
+        // Nạp dữ liệu ngay khi mở app
         DataService.loadData();
 
-        System.out.println("\n--- ĐĂNG NHẬP ---");
-        System.out.print("Username: "); String user = sc.nextLine().trim();
-        System.out.print("Password: "); String pass = sc.nextLine().trim();
-
-        User current = null;
-        for (User u : DataService.allUsers) {
-            // So sánh username không phân biệt hoa thường
-            if (u.getUsername().equalsIgnoreCase(user) && u.getPassword().equals(pass)) {
-                current = u;
-                break;
-            }
-        }
-
-        if (current != null) {
-            System.out.println("✅ Đăng nhập thành công! Chào " + current.getFullName());
-            session(current);
-        } else {
-            System.out.println("❌ Sai tài khoản hoặc mật khẩu!");
-        }
-    }
-
-    private static void session(User user) {
         while (true) {
-            // Luôn làm mới dữ liệu hệ thống từ file
+            // Luôn load lại dữ liệu ở đầu vòng lặp để đồng bộ với các cửa sổ khác
             DataService.loadData();
 
-            // Đồng bộ đối tượng user hiện tại với dữ liệu vừa nạp từ file
-            for (User updatedUser : DataService.allUsers) {
-                if (updatedUser.getId().equals(user.getId())) {
-                    user = updatedUser;
-                    break;
-                }
-            }
+            System.out.println("\n========= HỆ THỐNG GIA SƯ ONLINE =========");
+            System.out.println("1. Đăng nhập");
+            System.out.println("2. Đăng ký");
+            System.out.println("0. Thoát chương trình");
+            System.out.println("===========================================");
+            System.out.print("➤ Chọn chức năng: ");
+            String choice = sc.nextLine().trim();
 
-            user.displayMenu();
-            System.out.print("➤ Chọn: ");
-            String opt = sc.nextLine();
-
-            if (user.isExit(opt)) {
-                DataService.saveData(); // Lưu trước khi thoát phiên
+            if (choice.equals("0")) {
+                System.out.println("👋 Tạm biệt! Dữ liệu đã được lưu an toàn.");
                 break;
             }
 
-            execute(user, opt);
-
-            // Lưu lại sau mỗi hành động thực thi thành công
-            DataService.saveData();
+            switch (choice) {
+                case "1" -> handleLogin();
+                case "2" -> handleRegister();
+                default -> System.out.println("⚠️ Lựa chọn không hợp lệ!");
+            }
         }
     }
 
-    private static void execute(User u, String opt) {
-        try {
-            int c = Integer.parseInt(opt);
-            if (u instanceof Parent p) {
-                switch (c) {
-                    case 1 -> ParentService.searchAndRequest(sc, p);
-                    case 2 -> ParentService.createPost(sc, p.getId());
-                    case 3 -> ParentService.managePosts(sc, p);
-                    case 5 -> ParentService.classManagement(sc, p);
-                }
-            } else if (u instanceof Tutor t) {
-                switch (c) {
-                    case 1 -> TutorService.searchAndApply(sc, t);
-                    case 2 -> TutorService.manageWallet(sc, t);
-                    case 3 -> TutorService.teachingManagement(sc, t);
-                    case 4 -> TutorService.handleInvitations(sc, t);
-                }
-            } else if (u instanceof Admin a) {
-                switch (c) {
-                    case 1 -> AdminService.manageTutors(sc, a);
-                    case 2 -> AdminService.resolveComplaints(sc, a);
-                    case 3 -> AdminService.showRevenue();
-                }
-            }
-        } catch (Exception e) { System.out.println("❌ Lỗi: " + e.getMessage()); }
-    }
-
+    /**
+     * Xử lý Đăng ký: Tự sinh ID p1, t1 và ghi vào accounts.txt
+     */
     private static void handleRegister() {
-        // Nạp dữ liệu để kiểm tra trùng lặp username
-        DataService.loadData();
+        System.out.println("\n--- ĐĂNG KÝ TÀI KHOẢN MỚI ---");
+        System.out.print("Chọn vai trò (1. Phụ huynh | 2. Gia sư): ");
+        String roleOpt = sc.nextLine().trim();
 
-        System.out.println("\n--- ĐĂNG KÝ MỚI ---");
-        System.out.print("1. Phụ huynh | 2. Gia sư: ");
-        String role = sc.nextLine();
-        System.out.print("Username: "); String u = sc.nextLine().trim();
+        System.out.print("Username: "); String user = sc.nextLine().trim();
 
-        // Kiểm tra username tồn tại
-        for (User existing : DataService.allUsers) {
-            if (existing.getUsername().equalsIgnoreCase(u)) {
-                System.out.println("❌ Tên đăng nhập đã tồn tại!");
+        // Kiểm tra trùng Username (không phân biệt hoa thường)
+        for (User u : DataService.allUsers) {
+            if (u.getUsername().equalsIgnoreCase(user)) {
+                System.out.println("❌ Tên đăng nhập đã tồn tại! Thử tên khác.");
                 return;
             }
         }
 
-        System.out.print("Pass: "); String p = sc.nextLine();
-        System.out.print("Tên: "); String n = sc.nextLine();
-        System.out.print("SĐT: "); String ph = sc.nextLine();
+        System.out.print("Mật khẩu: "); String pass = sc.nextLine().trim();
+        System.out.print("Họ và tên: "); String name = sc.nextLine().trim();
+        System.out.print("Số điện thoại: "); String phone = sc.nextLine().trim();
 
-        String id = "U" + System.currentTimeMillis();
-        User newUser;
-        if (role.equals("1")) {
-            newUser = new Parent(id, u, p, n, ph, "PARENT");
+        if (roleOpt.equals("1")) {
+            // Sinh ID dạng p1, p2...
+            String id = DataService.generateId("p");
+            DataService.allUsers.add(new Parent(id, user, pass, name, phone, "PARENT"));
+            System.out.println("✅ Đăng ký thành công Phụ huynh! ID của bạn là: " + id);
+        } else if (roleOpt.equals("2")) {
+            System.out.print("Môn dạy chuyên môn: "); String sub = sc.nextLine().trim();
+            // Sinh ID dạng t1, t2...
+            String id = DataService.generateId("t");
+            DataService.allUsers.add(new Tutor(id, user, pass, name, phone, "TUTOR", sub));
+            System.out.println("✅ Đăng ký thành công Gia sư! ID của bạn là: " + id);
         } else {
-            System.out.print("Môn: "); String sub = sc.nextLine();
-            System.out.print("Quận: "); String ar = sc.nextLine();
-            newUser = new Tutor(id, u, p, n, ph, "TUTOR", sub, ar);
+            System.out.println("❌ Vai trò không hợp lệ!");
+            return;
         }
 
-        DataService.allUsers.add(newUser);
-
-        // QUAN TRỌNG: Lưu xuống file ngay để các cửa sổ khác có thể thấy
+        // Lưu file nhị phân và xuất accounts.txt ngay lập tức
         DataService.saveData();
-        System.out.println("✅ Đăng ký thành công! Bạn có thể đăng nhập ngay.");
+    }
+
+    /**
+     * Xử lý Đăng nhập: Kiểm tra trạng thái Gia sư (Duyệt/Khóa)
+     */
+    private static void handleLogin() {
+        System.out.println("\n--- ĐĂNG NHẬP HỆ THỐNG ---");
+        System.out.print("Username: "); String u = sc.nextLine().trim();
+        System.out.print("Password: "); String p = sc.nextLine().trim();
+
+        User loggedInUser = null;
+        for (User user : DataService.allUsers) {
+            // Đăng nhập không phân biệt hoa thường với Username
+            if (user.getUsername().equalsIgnoreCase(u) && user.getPassword().equals(p)) {
+                loggedInUser = user;
+                break;
+            }
+        }
+
+        if (loggedInUser == null) {
+            System.out.println("❌ Sai tài khoản hoặc mật khẩu!");
+            return;
+        }
+
+        // Kiểm tra riêng cho Gia sư: Nếu bị khóa thì không cho vào
+        if (loggedInUser instanceof Tutor t) {
+            if (t.getStatus().equals("LOCKED")) {
+                System.out.println("🛑 TÀI KHOẢN BỊ KHÓA! Vui lòng liên hệ Admin để xử lý.");
+                return;
+            }
+        }
+
+        System.out.println("✅ Đăng nhập thành công! Chào " + loggedInUser.getFullName());
+        enterSession(loggedInUser);
+    }
+
+    /**
+     * Quản lý phiên làm việc sau khi đăng nhập
+     */
+    private static void enterSession(User user) {
+        while (true) {
+            // Cập nhật lại đối tượng user từ List chung (để lấy ví tiền, trạng thái mới nhất)
+            DataService.loadData();
+            for (User updated : DataService.allUsers) {
+                if (updated.getId().equals(user.getId())) {
+                    user = updated;
+                    break;
+                }
+            }
+
+            // Hiển thị Menu tương ứng với vai trò (đã định nghĩa trong mỗi Class Model)
+            user.displayMenu();
+            System.out.print("➤ Nhập lựa chọn (0 để Đăng xuất): ");
+            String opt = sc.nextLine().trim();
+
+            if (user.isExit(opt)) {
+                System.out.println("🔒 Đã đăng xuất.");
+                break;
+            }
+
+            // Đây là nơi gọi đến các Service xử lý (Sẽ viết ở bước sau)
+            executeFeature(user, opt);
+
+            // Sau mỗi hành động, tự động lưu dữ liệu
+            DataService.saveData();
+        }
+    }
+
+    /**
+     * Điều phối các tính năng dựa trên vai trò
+     */
+    private static void executeFeature(User u, String opt) {
+        if (u instanceof Parent p) {
+            switch (opt) {
+                case "1" -> ParentService.searchTutor(p);
+                case "2" -> ParentService.createPost(p);
+                case "3" -> ParentService.manageWallet(p);
+                case "4" -> ParentService.manageRequests(p);
+                case "5" -> ParentService.managePosts(p);
+                case "6" -> ParentService.manageClasses(p);
+            }
+        } else if (u instanceof Tutor t) {
+            switch (opt) {
+                case "1" -> TutorService.findJob(t);
+                case "2" -> TutorService.manageWallet(t);
+                case "3" -> TutorService.manageAppliedClasses(t);
+                case "4" -> TutorService.manageInvitations(t);
+                case "5" -> TutorService.manageTeachingClasses(t);
+                case "6" -> TutorService.viewReviews(t);
+            }
+        } else if (u instanceof Admin a) {
+            switch (opt) {
+                case "1" -> AdminService.manageTutors();
+                case "2" -> AdminService.handleComplaints();
+                case "3" -> AdminService.viewRevenue();
+            }
+        }
     }
 }

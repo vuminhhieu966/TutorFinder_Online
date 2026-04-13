@@ -1,143 +1,141 @@
 package com.tutorfinder.service;
 
 import com.tutorfinder.model.*;
-import java.util.*;
+import java.util.Scanner;
 
 public class TutorService {
+    private static Scanner sc = new Scanner(System.in);
 
-    // 1. TÌM LỚP & ĐĂNG KÝ (Thanh toán 2 buổi phí)
-    public static void searchAndApply(Scanner sc, Tutor t) {
-        DataService.loadData();
-        System.out.println("\n--- TÌM LỚP HỌC (Nhấn Enter để hiện tất cả) ---");
-        System.out.print("Khu vực muốn tìm: ");
-        String area = sc.nextLine().trim();
-
-        List<Post> results = new ArrayList<>();
-        for (Post p : DataService.activePosts) {
-            if (p.getStatus().equalsIgnoreCase("OPEN")) {
-                // Lọc theo khu vực (bỏ trống = all)
-                if (area.isEmpty() || t.isMatch(p.getArea(), area)) {
-                    results.add(p);
-                }
-            }
-        }
-
-        if (results.isEmpty()) {
-            System.out.println("❌ Hiện không có lớp nào phù hợp.");
+    // 1. TÌM LỚP HỌC (Xem bài đăng của Phụ huynh)
+    public static void findJob(Tutor t) {
+        // Kiểm tra trạng thái duyệt
+        if (t.getStatus().equals("PENDING")) {
+            System.out.println("⚠️ Tài khoản của bạn đang chờ Admin duyệt. Chưa thể đăng ký nhận lớp!");
             return;
         }
 
-        System.out.println("\n--- DANH SÁCH LỚP ---");
-        for (Post p : results) {
-            System.out.println("[" + p.getPostId() + "] Môn: " + p.getSubject() +
-                    " | Khu vực: " + p.getArea() +
-                    " | Phí 2 buổi cần nộp: " + (p.getFeePerLesson() * 2) + "đ");
+        System.out.print("➤ Nhập môn muốn tìm (Bỏ qua nhấn Enter): ");
+        String sub = sc.nextLine().trim();
+
+        System.out.println("\n--- DANH SÁCH BÀI ĐĂNG TÌM GIA SƯ ---");
+        boolean found = false;
+        for (Post po : DataService.allPosts) {
+            // Chỉ hiện bài đang OPEN và khớp môn
+            if (po.getStatus().equals("OPEN") && (sub.isEmpty() || t.isMatch(po.getSubject(), sub))) {
+                System.out.printf("[%s] Môn: %-10s | Phí: %-8.0f | Thời lượng: %d phút\n",
+                        po.getPostId(), po.getSubject(), po.getFee(), po.getMinutes());
+                found = true;
+            }
         }
 
-        System.out.print("\n➤ Nhập mã lớp để đăng ký nhận (hoặc '0' để quay lại): ");
-        String choice = sc.nextLine();
-        if (t.isExit(choice)) return;
+        if (!found) {
+            System.out.println("❌ Hiện không có bài đăng nào phù hợp.");
+            return;
+        }
 
-        for (Post p : results) {
-            if (p.getPostId().equalsIgnoreCase(choice)) {
-                double fee = p.getFeePerLesson() * 2;
-                if (t.getBalance() >= fee) {
-                    // Trừ tiền gia sư, cộng vào quỹ Admin
-                    t.setBalance(t.getBalance() - fee);
-                    DataService.totalRevenue += fee;
-
-                    // Thêm vào danh sách ứng viên
-                    if (!p.getApplicantIds().contains(t.getId())) {
-                        p.getApplicantIds().add(t.getId());
-                        System.out.println("✅ Đăng ký thành công! Đã trừ " + fee + "đ phí nhận lớp.");
-                        DataService.saveData();
-                    } else {
-                        System.out.println("⚠️ Bạn đã ứng tuyển lớp này rồi.");
-                    }
+        System.out.print("\n➤ Nhập mã bài đăng để ứng tuyển (hoặc 0): ");
+        String poId = sc.nextLine().trim();
+        for (Post po : DataService.allPosts) {
+            if (po.getPostId().equals(poId)) {
+                if (!po.getApplicantIds().contains(t.getId())) {
+                    po.getApplicantIds().add(t.getId());
+                    System.out.println("✅ Đã gửi hồ sơ ứng tuyển thành công!");
                 } else {
-                    System.out.println("❌ Số dư ví không đủ! Bạn cần thêm " + (fee - t.getBalance()) + "đ.");
+                    System.out.println("⚠️ Bạn đã ứng tuyển bài này rồi.");
                 }
-                return;
             }
         }
     }
 
-    // 2. QUẢN LÝ VÍ (Nạp/Rút)
-    public static void manageWallet(Scanner sc, Tutor t) {
-        System.out.println("\n--- VÍ CÁ NHÂN ---");
-        System.out.println("Số dư hiện tại: " + t.getBalance() + " VNĐ");
+    // 2. VÍ CÁ NHÂN (Nạp/Rút)
+    public static void manageWallet(Tutor t) {
+        System.out.println("\n--- VÍ GIA SƯ ---");
+        System.out.println("💰 Số dư: " + t.getBalance() + " VNĐ");
         System.out.println("1. Nạp tiền | 2. Rút tiền | 0. Quay lại");
         String opt = sc.nextLine();
+        if (opt.equals("1")) {
+            System.out.print("Nhập số tiền nạp: ");
+            t.setBalance(t.getBalance() + Double.parseDouble(sc.nextLine()));
+            System.out.println("✅ Nạp tiền thành công!");
+        } else if (opt.equals("2")) {
+            System.out.print("Nhập số tiền rút: ");
+            double amt = Double.parseDouble(sc.nextLine());
+            if (amt <= t.getBalance()) {
+                t.setBalance(t.getBalance() - amt);
+                System.out.println("✅ Rút tiền thành công!");
+            } else System.out.println("❌ Số dư không đủ!");
+        }
+    }
 
-        try {
-            if (opt.equals("1")) {
-                System.out.print("Nhập số tiền nạp: ");
-                double amt = Double.parseDouble(sc.nextLine());
-                t.setBalance(t.getBalance() + amt);
-                System.out.println("✅ Đã nạp tiền.");
-            } else if (opt.equals("2")) {
-                System.out.print("Nhập số tiền rút: ");
-                double amt = Double.parseDouble(sc.nextLine());
-                if (amt <= t.getBalance()) {
-                    t.setBalance(t.getBalance() - amt);
-                    System.out.println("✅ Đã gửi yêu cầu rút tiền.");
+    // 3. CÁC LỚP ĐÃ ĐĂNG KÝ (Thanh toán phí 2 buổi để mở lớp)
+    public static void manageAppliedClasses(Tutor t) {
+        System.out.println("\n--- TRẠNG THÁI LỚP ỨNG TUYỂN ---");
+        for (ClassRoom c : DataService.allClasses) {
+            if (c.getTutorId().equals(t.getId()) && c.getStatus().equals("PENDING_FEE")) {
+                System.out.printf("[%s] Môn: %-10s | Phí 2 buổi cần đóng: %.0f VNĐ\n",
+                        c.getClassId(), c.getSubject(), c.getFee() * 2);
+            }
+        }
+        System.out.print("➤ Nhập mã lớp để thanh toán phí và MỞ LỚP: ");
+        String cid = sc.nextLine();
+        for (ClassRoom c : DataService.allClasses) {
+            if (c.getClassId().equals(cid) && c.getTutorId().equals(t.getId())) {
+                double requiredFee = c.getFee() * 2;
+                if (t.getBalance() >= requiredFee) {
+                    t.setBalance(t.getBalance() - requiredFee);
+                    DataService.totalRevenue += requiredFee; // Tiền phí chảy về túi Admin
+                    c.setStatus("CLOSED"); // Chuyển sang trạng thái đã kích hoạt (đang nghỉ)
+                    System.out.println("✅ Thanh toán phí thành công! Lớp [" + cid + "] đã sẵn sàng dạy.");
                 } else {
-                    System.out.println("❌ Không đủ số dư.");
+                    System.out.println("❌ Ví không đủ tiền. Vui lòng nạp thêm " + (requiredFee - t.getBalance()) + " VNĐ.");
                 }
             }
-            DataService.saveData();
-        } catch (Exception e) {
-            System.out.println("❌ Lỗi: Vui lòng nhập số tiền hợp lệ.");
         }
     }
 
-    // 3. THƯ MỜI TỪ PHỤ HUYNH
-    public static void handleInvitations(Scanner sc, Tutor t) {
-        DataService.loadData();
-        if (t.getIncomingInvitations().isEmpty()) {
-            System.out.println("📭 Bạn chưa có thư mời nào.");
-            return;
-        }
-
-        System.out.println("\n--- THƯ MỜI DẠY ---");
-        for (String parentId : t.getIncomingInvitations()) {
-            System.out.println("Phụ huynh ID: " + parentId + " đang mời bạn dạy.");
-        }
-
-        System.out.print("\n➤ Nhập ID Phụ huynh để chấp nhận (hoặc '0' quay lại): ");
-        String pid = sc.nextLine();
-        if (t.isExit(pid)) return;
-
-        if (t.getIncomingInvitations().contains(pid)) {
-            // Chấp nhận: Tạo một enrollment mới (Cần có postId cụ thể, ở đây làm đơn giản hóa)
-            System.out.println("✅ Đã nhận lời! Hãy liên hệ với Phụ huynh " + pid);
-            t.getIncomingInvitations().remove(pid);
-            DataService.saveData();
-        }
-    }
-
-    // 4. LỚP ĐANG DẠY & KHIẾU NẠI HOÀN TIỀN
-    public static void teachingManagement(Scanner sc, Tutor t) {
-        DataService.loadData();
-        System.out.println("\n--- LỚP ĐANG DẠY ---");
-        List<Enrollment> myClasses = new ArrayList<>();
-        for (Enrollment e : DataService.allEnrollments) {
-            if (e.getTutorId().equals(t.getId())) {
-                System.out.println("Lớp: " + e.getPostId() + " | Phụ huynh: " + e.getParentId());
-                myClasses.add(e);
+    // 4. THƯ MỜI TỪ PHỤ HUYNH
+    public static void manageInvitations(Tutor t) {
+        System.out.println("\n--- HỘP THƯ MỜI DẠY ---");
+        for (Request r : DataService.allRequests) {
+            if (r.getTutorId().equals(t.getId()) && r.getStatus().equals("PENDING")) {
+                System.out.printf("[%s] PH: %s | Môn: %s | Lương: %.0f | Thời lượng: %dp\n",
+                        r.getReqId(), r.getParentId(), r.getSubject(), r.getFee(), r.getMinutes());
             }
         }
+        System.out.print("➤ Chọn mã yêu cầu để xử lý (1. Nhận | 2. Từ chối | 0. Quay lại): ");
+        String rid = sc.nextLine();
+        // ... Logic nhận/từ chối tương tự: Nhận thì tạo ClassRoom trạng thái PENDING_FEE
+    }
 
-        if (myClasses.isEmpty()) return;
+    // 5. CÁC LỚP ĐANG DẠY (Mở phòng học Online)
+    public static void manageTeachingClasses(Tutor t) {
+        System.out.println("\n--- DANH SÁCH LỚP ĐANG DẠY ---");
+        for (ClassRoom c : DataService.allClasses) {
+            if (c.getTutorId().equals(t.getId()) && !c.getStatus().equals("PENDING_FEE")) {
+                System.out.printf("[%s] Môn: %-10s | Trạng thái phòng: %s\n",
+                        c.getClassId(), c.getSubject(), c.getStatus());
+            }
+        }
+        System.out.print("➤ Nhập mã lớp để MỞ/ĐÓNG phòng học: ");
+        String cid = sc.nextLine();
+        for (ClassRoom c : DataService.allClasses) {
+            if (c.getClassId().equals(cid)) {
+                if (c.getStatus().equals("CLOSED")) {
+                    c.setStatus("OPEN");
+                    System.out.println("🚀 Đã MỞ phòng học. Phụ huynh có thể vào học ngay bây giờ!");
+                } else {
+                    c.setStatus("CLOSED");
+                    System.out.println("🔒 Đã ĐÓNG phòng học.");
+                }
+            }
+        }
+    }
 
-        System.out.print("\n➤ Nhập mã lớp muốn khiếu nại hoàn tiền (hoặc '0'): ");
-        String pid = sc.nextLine();
-        if (t.isExit(pid)) return;
-
-        System.out.print("Lý do khiếu nại (Gia sư nghỉ, PH không nghe máy...): ");
-        String content = sc.nextLine();
-        DataService.allComplaints.add(new Complaint("C"+System.currentTimeMillis(), t.getId(), pid, content));
-        DataService.saveData();
-        System.out.println("✅ Đơn khiếu nại hoàn tiền đã gửi tới Admin.");
+    // 6. XEM ĐÁNH GIÁ
+    public static void viewReviews(Tutor t) {
+        System.out.println("\n--- HỒ SƠ UY TÍN GIA SƯ ---");
+        System.out.println("⭐ Điểm trung bình: " + String.format("%.1f", t.getRating()));
+        System.out.println("💬 Tổng số lượt đánh giá: " + t.getReviewCount());
+        // Có thể hiện thêm danh sách Complaint liên quan nếu muốn "gắt"
     }
 }

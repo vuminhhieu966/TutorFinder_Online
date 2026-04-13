@@ -1,49 +1,56 @@
 package com.tutorfinder.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-public class Tutor extends User implements Serializable {
+/**
+ * Lớp Tutor - Người dùng vai trò Gia sư
+ */
+public class Tutor extends User {
     private static final long serialVersionUID = 1L;
 
-    private String subject;
-    private String area;
-    private double balance;
-    private double rating;
-    private boolean isApproved;
-    private List<String> incomingInvitations; // Lưu ID các bài đăng PH gửi yêu cầu
+    private String subject;     // Môn học chuyên môn
+    private double balance;     // Ví tiền (Dùng để đóng phí 2 buổi khi nhận lớp)
+    private String status;      // Trạng thái: "PENDING" (Chờ duyệt), "APPROVED" (Đã duyệt), "LOCKED" (Bị khóa)
+    private double rating;      // Điểm sao trung bình
+    private int reviewCount;    // Tổng số lượt đánh giá
 
-    public Tutor(String id, String username, String password, String fullName, String phone, String role, String subject, String area) {
+    public Tutor(String id, String username, String password, String fullName, String phone, String role, String subject) {
         super(id, username, password, fullName, phone, role);
         this.subject = subject;
-        this.area = area;
         this.balance = 0.0;
-        this.rating = 5.0;
-        this.isApproved = false;
-        this.incomingInvitations = new ArrayList<>();
+        this.status = "PENDING"; // Đăng ký xong phải chờ Admin duyệt
+        this.rating = 5.0;       // Mới đăng ký cho 5 sao làm vốn
+        this.reviewCount = 0;
     }
 
     @Override
     public void displayMenu() {
-        System.out.println("\n=========== MENU GIA SƯ ===========");
-        System.out.println("1. Tìm lớp & Đăng ký nhận lớp (Phí 2 buổi)");
-        System.out.println("2. Ví cá nhân (Số dư: " + balance + "đ | Nạp/Rút)");
-        System.out.println("3. Các lớp đang dạy (Khiếu nại hoàn tiền)");
-        System.out.println("4. Thư mời dạy từ PH (" + incomingInvitations.size() + " mới)");
-        System.out.println("5. Xem đánh giá (⭐: " + rating + ")");
-        System.out.println("0. Đăng xuất (Hoặc nhập 'exit')");
-        System.out.println("===================================");
+        System.out.println("\n--- MENU GIA SƯ (" + getFullName() + " - [" + status + "]) ---");
+
+        // Nếu bị khóa thì MainApp sẽ chặn không cho vào đây, nhưng viết ở đây cho chắc
+        if (status.equals("LOCKED")) {
+            System.out.println("Tài khoản bị khóa. Vui lòng liên hệ Admin.");
+            return;
+        }
+
+        System.out.println("1. Tìm lớp học từ Phụ huynh");
+        System.out.println("2. Ví cá nhân (Nạp/Rút/Số dư: " + balance + "đ)");
+        System.out.println("--- QUẢN LÝ TÀI KHOẢN ---");
+        System.out.println("3. Các lớp đã đăng ký nhận (Chờ thanh toán phí)");
+        System.out.println("4. Thư mời trực tiếp từ Phụ huynh");
+        System.out.println("5. Các lớp đang dạy (Mở lớp cho PH vào học)");
+        System.out.println("6. Xem đánh giá cá nhân (" + rating + " ⭐ | " + reviewCount + " lượt)");
+        System.out.println("0. Đăng xuất");
+        System.out.println("------------------------------------------");
     }
 
-    // Getters & Setters
+    // Getters và Setters cho các thuộc tính đặc thù
     public String getSubject() { return subject; }
-    public String getArea() { return area; }
+    public void setSubject(String subject) { this.subject = subject; }
     public double getBalance() { return balance; }
     public void setBalance(double balance) { this.balance = balance; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     public double getRating() { return rating; }
     public void setRating(double rating) { this.rating = rating; }
-    public boolean isApproved() { return isApproved; }
-    public void setApproved(boolean approved) { isApproved = approved; }
-    public List<String> getIncomingInvitations() { return incomingInvitations; }
+    public int getReviewCount() { return reviewCount; }
+    public void setReviewCount(int reviewCount) { this.reviewCount = reviewCount; }
 }

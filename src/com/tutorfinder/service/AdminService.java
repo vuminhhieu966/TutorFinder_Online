@@ -4,106 +4,101 @@ import com.tutorfinder.model.*;
 import java.util.Scanner;
 
 public class AdminService {
+    private static Scanner sc = new Scanner(System.in);
 
-    // 1. QUẢN LÝ GIA SƯ (Duyệt/Khóa)
-    public static void manageTutors(Scanner sc, Admin admin) {
-        DataService.loadData();
-        System.out.println("\n--- DANH SÁCH GIA SƯ TOÀN HỆ THỐNG ---");
+    // 1. QUẢN LÝ GIA SƯ (Duyệt/Khóa/Mở khóa)
+    public static void manageTutors() {
+        System.out.println("\n--- QUẢN LÝ TÀI KHOẢN GIA SƯ ---");
+        System.out.println("Lọc theo trạng thái: 1. PENDING | 2. APPROVED | 3. LOCKED | 0. ALL");
+        String filter = sc.nextLine();
+
+        String targetStatus = switch (filter) {
+            case "1" -> "PENDING";
+            case "2" -> "APPROVED";
+            case "3" -> "LOCKED";
+            default -> "";
+        };
+
         for (User u : DataService.allUsers) {
             if (u instanceof Tutor t) {
-                System.out.println("ID: " + t.getId() + " | Tên: " + t.getFullName() +
-                        " | Trạng thái: " + (t.isApproved() ? "✅ Hoạt động" : "❌ Đang khóa/Chờ"));
+                if (targetStatus.isEmpty() || t.getStatus().equals(targetStatus)) {
+                    System.out.printf("[%s] Tên: %-15s | Môn: %-10s | Trạng thái: %s\n",
+                            t.getId(), t.getFullName(), t.getSubject(), t.getStatus());
+                }
             }
         }
 
-        System.out.print("\n➤ Nhập ID Gia sư để Duyệt/Khóa (hoặc '0' để quay lại): ");
-        String id = sc.nextLine();
-        if (admin.isExit(id)) return;
-
+        System.out.print("\n➤ Nhập ID Gia sư để xử lý (hoặc 0): ");
+        String tid = sc.nextLine();
         for (User u : DataService.allUsers) {
-            if (u.getId().equalsIgnoreCase(id) && u instanceof Tutor t) {
-                t.setApproved(!t.isApproved()); // Đảo ngược trạng thái
+            if (u.getId().equals(tid) && u instanceof Tutor t) {
+                System.out.println("Chọn hành động: 1. Duyệt | 2. Khóa | 3. Mở khóa");
+                String act = sc.nextLine();
+                if (act.equals("1")) t.setStatus("APPROVED");
+                else if (act.equals("2")) t.setStatus("LOCKED");
+                else if (act.equals("3")) t.setStatus("APPROVED");
                 System.out.println("✅ Đã cập nhật trạng thái cho " + t.getFullName());
-                DataService.saveData();
                 return;
             }
         }
     }
 
-    // 2. XỬ LÝ KHIẾU NẠI (Hoàn tiền hoặc Bác bỏ)
-    public static void resolveComplaints(Scanner sc, Admin admin) {
-        DataService.loadData();
-        System.out.println("\n--- CÁC ĐƠN KHIẾU NẠI ĐANG CHỜ ---");
-        boolean hasPending = false;
+    // 2. XỬ LÝ KHIẾU NẠI (Hoàn tiền nếu GS sai)
+    public static void handleComplaints() {
+        System.out.println("\n--- DANH SÁCH ĐƠN KHIẾU NẠI ---");
         for (Complaint cp : DataService.allComplaints) {
-            if (cp.getStatus().equalsIgnoreCase("PENDING")) {
-                System.out.println("[" + cp.getId() + "] Người gửi: " + cp.getSenderId() +
-                        " | Lớp: " + cp.getPostId() + " | Nội dung: " + cp.getContent());
-                hasPending = true;
+            if (cp.getStatus().equals("PENDING")) {
+                System.out.printf("[%s] Người gửi: %s | Lớp: %s | Nội dung: %s\n",
+                        cp.getComplaintId(), cp.getSenderId(), cp.getClassId(), cp.getContent());
             }
         }
 
-        if (!hasPending) {
-            System.out.println("📭 Không có khiếu nại nào.");
-            return;
-        }
+        System.out.print("\n➤ Nhập mã đơn để xử lý: ");
+        String cpid = sc.nextLine();
+        for (Complaint cp : DataService.allComplaints) {
+            if (cp.getComplaintId().equals(cpid)) {
+                System.out.println("Quyết định: 1. Bác bỏ (GS đúng) | 2. Chấp nhận (GS sai - Hoàn tiền)");
+                String decision = sc.nextLine();
 
-        System.out.print("\n➤ Nhập mã đơn (ID) để xử lý: ");
-        String cpId = sc.nextLine();
-        System.out.println("Hành động: 1. Hoàn tiền & Đóng đơn | 2. Bác bỏ | 0. Quay lại");
-        String opt = sc.nextLine();
-
-        if (opt.equals("1")) {
-            handleRefund(cpId);
-        } else if (opt.equals("2")) {
-            updateComplaintStatus(cpId, "REJECTED");
-            System.out.println("✅ Đã bác bỏ đơn khiếu nại.");
+                if (decision.equals("2")) {
+                    refundProcess(cp);
+                    cp.setStatus("RESOLVED");
+                } else {
+                    cp.setStatus("REJECTED");
+                }
+                System.out.println("✅ Đã xử lý khiếu nại.");
+                return;
+            }
         }
     }
 
-    // Logic hoàn tiền (Lấy từ Revenue trả về ví Gia sư)
-    private static void handleRefund(String complaintId) {
-        for (Complaint cp : DataService.allComplaints) {
-            if (cp.getId().equalsIgnoreCase(complaintId)) {
-                // Giả sử hoàn phí 2 buổi dựa trên bài đăng
-                for (Post p : DataService.activePosts) {
-                    if (p.getPostId().equalsIgnoreCase(cp.getPostId())) {
-                        double refundAmt = p.getFeePerLesson() * 2;
-
-                        // Tìm gia sư (người gửi khiếu nại) để trả tiền
-                        for (User u : DataService.allUsers) {
-                            if (u.getId().equalsIgnoreCase(cp.getSenderId()) && u instanceof Tutor t) {
-                                t.setBalance(t.getBalance() + refundAmt);
-                                DataService.totalRevenue -= refundAmt;
-                                cp.setStatus("RESOLVED - REFUNDED");
-                                System.out.println("✅ Đã hoàn " + refundAmt + "đ cho Gia sư " + t.getFullName());
-                                DataService.saveData();
-                                return;
-                            }
-                        }
+    private static void refundProcess(Complaint cp) {
+        // Tìm lớp học và phụ huynh để hoàn lại phí buổi học cuối
+        for (ClassRoom c : DataService.allClasses) {
+            if (c.getClassId().equals(cp.getClassId())) {
+                for (User u : DataService.allUsers) {
+                    if (u.getId().equals(cp.getSenderId()) && u instanceof Parent p) {
+                        p.setBalance(p.getBalance() + c.getFee());
+                        System.out.println("💰 Đã hoàn " + c.getFee() + "đ vào ví Phụ huynh " + p.getFullName());
                     }
                 }
             }
         }
     }
 
-    private static void updateComplaintStatus(String id, String status) {
-        for (Complaint cp : DataService.allComplaints) {
-            if (cp.getId().equalsIgnoreCase(id)) {
-                cp.setStatus(status);
-                DataService.saveData();
-                return;
-            }
-        }
-    }
-
     // 3. BÁO CÁO DOANH THU
-    public static void showRevenue() {
-        DataService.loadData();
-        System.out.println("\n========= BÁO CÁO TÀI CHÍNH =========");
-        System.out.println("💰 Tổng doanh thu hệ thống: " + DataService.totalRevenue + " VNĐ");
-        System.out.println("📊 Tổng số gia sư: " + DataService.allUsers.stream().filter(u -> u instanceof Tutor).count());
-        System.out.println("📊 Tổng số bài đăng: " + DataService.activePosts.size());
-        System.out.println("======================================");
+    public static void viewRevenue() {
+        System.out.println("\n========= BÁO CÁO TÀI CHÍNH HỆ THỐNG =========");
+        System.out.println("📈 Tổng doanh thu (Phí 2 buổi + 10% học phí):");
+        System.out.printf("💰 Số tiền: %,.0f VNĐ\n", DataService.totalRevenue);
+
+        int totalTutors = 0;
+        int activeClasses = 0;
+        for (User u : DataService.allUsers) if (u instanceof Tutor) totalTutors++;
+        for (ClassRoom c : DataService.allClasses) if (!c.getStatus().equals("PENDING_FEE")) activeClasses++;
+
+        System.out.println("👥 Tổng số gia sư: " + totalTutors);
+        System.out.println("📖 Số lớp đã kích hoạt: " + activeClasses);
+        System.out.println("==============================================");
     }
 }
