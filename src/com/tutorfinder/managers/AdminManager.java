@@ -15,30 +15,27 @@ public class AdminManager {
         boolean hasPending = false;
         for (User u : Database.getInstance().users) {
             if (u instanceof Tutor t && t.getStatus() == 0) {
-                System.out.printf("ID: %s | Tên: %s | Dạy môn: %s | Quận: %s\n",
-                        t.getId(), t.getName(), t.getSubjects(), t.getArea());
+                System.out.printf("ID: %s | Tên: %s | Dạy môn: %s | Dạy lớp: %s | Quận: %s\n",
+                        t.getId(), t.getName(), t.getSubjects(), t.getGrades(), t.getArea());
                 hasPending = true;
             }
         }
 
         if (!hasPending) {
-            System.out.println("Hệ thống sạch sẽ, không có Gia sư nào chờ duyệt!");
+            System.out.println("Không có Gia sư nào chờ duyệt!");
         }
 
-        System.out.println("\nHD: Nhập ID để Duyệt (VD: t1) | Nhập -ID để Khóa (VD: -t1)");
-        System.out.print("Thao tác (Hoặc Enter để Quay lại): ");
-        String input = sc.nextLine();
+        System.out.println("\nHD: Nhập ID để Duyệt: ");
+        String input = sc.nextLine(); // input lúc này chính là ID luôn
 
-        if (input.isEmpty()) return; // Nút thoát hiểm
-
-        boolean lock = input.startsWith("-");
-        String tid = lock ? input.substring(1) : input; // Lọc bỏ dấu trừ để lấy ID thật
+        if (input.isEmpty() || input.equals("0")) return; // Nút
 
         for (User u : Database.getInstance().users) {
-            if (u.getId().equalsIgnoreCase(tid) && u instanceof Tutor t) {
-                t.setStatus(lock ? -1 : 1); // -1 là Khóa, 1 là Duyệt
+            // so sanhs input với ID của User
+            if (u.getId().equalsIgnoreCase(input) && u instanceof Tutor t) {
+                t.setStatus(1); // duyệt
                 Database.save();
-                System.out.println("Đã cập nhật trạng thái cho Gia sư " + t.getName() + " thành công!");
+                System.out.println("Đã duyệt tài khoản cho Gia sư " + t.getName() + " thành công!");
                 return;
             }
         }
@@ -51,29 +48,29 @@ public class AdminManager {
         boolean hasPending = false;
         for (JobPost jp : Database.getInstance().posts) {
             if (jp.getStatus() == 0) {
-                System.out.printf("Mã Bài: %s | Môn: %s | Lớp: %s | Giá: %.0f\n",
-                        jp.getId(), jp.getSubject(), jp.getGrade(), jp.getPrice());
+                System.out.printf("Mã Bài: %s | Môn: %s | Lớp: %s | Khu vực: %s | Giá: %.0f\n",
+                        jp.getId(), jp.getSubject(), jp.getGrade(), jp.getArea(), jp.getPrice());
                 hasPending = true;
             }
         }
 
         if (!hasPending) {
-            System.out.println("Tuyệt vời, không có bài đăng nào tồn đọng!");
+            System.out.println("không có bài đăng nào chờ duyệt!");
         }
 
-        System.out.print("\nNhập Mã Bài đăng để Duyệt hiển thị (Hoặc Enter để Quay lại): ");
+        System.out.print("\nNhập Mã Bài đăng để Duyệt: ");
         String jid = sc.nextLine();
 
-        if (jid.isEmpty()) return; // Nút thoát hiểm
+        if (jid.isEmpty() || jid.equals("0")) return; // Nút thoát hiểm
 
         for (JobPost jp : Database.getInstance().posts) {
             if (jp.getId().equalsIgnoreCase(jid) && jp.getStatus() == 0) {
-                jp.setStatus(1); // 1 = Đã duyệt, hiện lên hệ thống
+                jp.setStatus(1); // Duyệt
                 Database.save();
-                System.out.println("Duyệt bài thành công! Các Gia sư đã có thể tìm thấy bài này.");
+                System.out.println("Duyệt bài thành công!");
                 return;
             }
         }
-        System.out.println("Lỗi: Không tìm thấy Mã Bài hoặc bài này đã được duyệt rồi!");
+        System.out.println("Lỗi: Không tìm thấy Mã Bài đăng!");
     }
 }

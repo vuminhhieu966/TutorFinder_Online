@@ -19,17 +19,17 @@ public abstract class User implements Serializable {
         this.phone = phone;
     }
 
-    // Các hàm Getter (Lấy thông tin)
+    // Getter
     public String getId() { return id; }
     public String getUsername() { return username; }
     public String getPassword() { return password; }
     public String getName() { return name; }
     public String getPhone() { return phone; }
 
-    // Các hàm Setter (Cập nhật thông tin khi cần đổi tên, SĐT)
+    // Setter
     public void setName(String name) { this.name = name; }
     public void setPhone(String phone) { this.phone = phone; }
 
-    // Hàm trừu tượng bắt buộc các lớp con phải khai báo Vai trò
+    // Hàm trừu tượng
     public abstract String getRole();
 }

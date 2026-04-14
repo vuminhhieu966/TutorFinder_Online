@@ -127,6 +127,7 @@ public class Main {
         System.out.println("\n--- MENU GIA SƯ [" + st + "] ---");
         System.out.println("1. Tìm lớp đăng ký dạy");
         System.out.println("2. Xem chỉ số đánh giá của tôi");
+        System.out.println("3. Quản lý các lớp đã đăng ký (Hủy nhận lớp)"); // Đã thêm lựa chọn số 3
         System.out.println("0. Đăng xuất");
         System.out.print("Chọn: ");
 
@@ -136,6 +137,7 @@ public class Main {
                 else System.out.println("Tài khoản chưa được Admin duyệt, không thể tìm lớp!");
                 break;
             case "2": tMan.viewReviews(t); break;
+            case "3": tMan.manageMyRegistrations(t); break; // Gọi hàm mới tạo
             case "0": loggedUser = null; break;
         }
     }

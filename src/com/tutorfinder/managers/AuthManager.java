@@ -5,10 +5,10 @@ import com.tutorfinder.model.*;
 
 public class AuthManager {
 
-    // Hàm dùng chung nội bộ: Kiểm tra xem Tên đăng nhập đã ai dùng chưa
+    // kiểm tra tài khoản đã rồn tại chưa
     private boolean isUsernameTaken(String username) {
         for (User u : Database.getInstance().users) {
-            // So sánh không phân biệt chữ hoa chữ thường (vd: 'Hoang' và 'hoang' là giống nhau)
+
             if (u.getUsername().equalsIgnoreCase(username)) {
                 return true;
             }
@@ -16,7 +16,7 @@ public class AuthManager {
         return false;
     }
 
-    // Xử lý Đăng nhập
+    // Đăng nhập
     public User login(String username, String password) {
         for (User u : Database.getInstance().users) {
             if (u.getUsername().equals(username) && u.getPassword().equals(password)) {
@@ -26,9 +26,9 @@ public class AuthManager {
         return null; // Trả về null nếu sai
     }
 
-    // Xử lý Đăng ký Phụ huynh (Trả về true nếu thành công, false nếu trùng tên)
+    // Đăng ký Phụ huynh (Trả về true nếu thành công, false nếu trùng tên)
     public boolean registerParent(String username, String password, String name, String phone) {
-        if (isUsernameTaken(username)) return false; // Chặn ngay nếu trùng
+        if (isUsernameTaken(username)) return false; // trùng tên
 
         String pId = "p" + (Database.getInstance().pIdx++);
         Database.getInstance().users.add(new Parent(pId, username, password, name, phone));
@@ -39,7 +39,7 @@ public class AuthManager {
     // Xử lý Đăng ký Gia sư
     public boolean registerTutor(String username, String password, String name, String phone,
                                  String subjects, String grades, String area) {
-        if (isUsernameTaken(username)) return false; // Chặn ngay nếu trùng
+        if (isUsernameTaken(username)) return false; // trùng tên
 
         String tId = "t" + (Database.getInstance().tIdx++);
         Database.getInstance().users.add(new Tutor(tId, username, password, name, phone, subjects, grades, area));
