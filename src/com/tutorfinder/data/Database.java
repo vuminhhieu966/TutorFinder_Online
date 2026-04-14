@@ -9,7 +9,7 @@ public class Database implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // Tên file lưu trữ dữ liệu gốc (Nhị phân)
-    private static final String DATA_FILE = "tutor_v2.dat";
+    private static final String DATA_FILE = "tutor_v3.dat";
     // Tên file báo cáo để người dùng có thể mở ra xem trực tiếp (Text)
     private static final String ACCOUNTS_FILE = "accounts.txt";
 
@@ -39,9 +39,9 @@ public class Database implements Serializable {
         return instance;
     }
 
-    // ==========================================
+
     // CƠ CHẾ ĐỒNG BỘ HAI CỬA SỔ
-    // ==========================================
+
 
     // Hàm LƯU dữ liệu xuống ổ cứng
     public static void save() {

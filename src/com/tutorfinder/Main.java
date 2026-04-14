@@ -9,7 +9,7 @@ public class Main {
     static Scanner sc = new Scanner(System.in);
     static User loggedUser = null; // Lưu tài khoản đang đăng nhập
 
-    // Khởi tạo các Manager xử lý logic
+    // Khởi tạo các Manager
     static AuthManager auth = new AuthManager();
     static ParentManager pMan = new ParentManager(sc);
     static TutorManager tMan = new TutorManager(sc);
@@ -17,20 +17,19 @@ public class Main {
 
     public static void main(String[] args) {
         while (true) {
-            Database.load(); // LUÔN LOAD: Để thấy thay đổi từ cửa sổ khác
+            Database.load(); // LOAD: Để thấy thay đổi từ cửa sổ khác
 
             if (loggedUser == null) {
-                System.out.println("\n=== HỆ THỐNG GIA SƯ HÀ NỘI ===");
+                System.out.println("\n=== TÌM GIA SƯ ONLINE ===");
                 System.out.println("1. Đăng nhập");
                 System.out.println("2. Đăng ký");
-                System.out.println("0. Thoát chương trình");
+                System.out.println("0. Thoát");
                 System.out.print("Chọn thao tác: ");
                 String c = sc.nextLine();
 
                 if (c.equals("1")) login();
                 else if (c.equals("2")) register();
                 else if (c.equals("0")) {
-                    System.out.println("Cảm ơn bạn đã sử dụng hệ thống!");
                     break;
                 }
             } else {
@@ -42,19 +41,17 @@ public class Main {
         }
     }
 
-    // ==============================================
-    // CHỨC NĂNG ĐĂNG NHẬP (CÓ NÚT THOÁT)
-    // ==============================================
+
+    // CHỨC NĂNG ĐĂNG NHẬP
     static void login() {
         System.out.println("\n--- ĐĂNG NHẬP (Nhập 0 để quay lại) ---");
         System.out.print("Tên đăng nhập: ");
         String u = sc.nextLine();
-
-        // Nút thoát hiểm: Nếu gõ 0 thì thoát ngay hàm login() về menu ngoài
-        if (u.equals("0")) return;
+        if (u.equals("0") || u.isEmpty()) return;
 
         System.out.print("Mật khẩu: ");
         String p = sc.nextLine();
+        if (p.equals("0") || p.isEmpty()) return;
 
         loggedUser = auth.login(u, p);
         if (loggedUser == null) {
@@ -64,50 +61,52 @@ public class Main {
         }
     }
 
-    // ==============================================
-    // CHỨC NĂNG ĐĂNG KÝ (CÓ NÚT THOÁT)
-    // ==============================================
+    // CHỨC NĂNG ĐĂNG KÝ
     static void register() {
-        System.out.println("\n--- ĐĂNG KÝ TÀI KHOẢN (Nhập 0 để quay lại) ---");
+        System.out.println("\n--- ĐĂNG KÝ TÀI KHOẢN ---");
         System.out.print("Bạn là ai? (1. Phụ huynh | 2. Gia sư): ");
         String r = sc.nextLine();
 
         // Nút thoát hiểm ngay từ bước chọn vai trò
-        if (r.equals("0")) return;
+        if (r.equals("0") || r.isEmpty()) return;
         if (!r.equals("1") && !r.equals("2")) {
             System.out.println("Lựa chọn không hợp lệ!");
             return;
         }
 
-        System.out.print("Tên đăng nhập muốn tạo: ");
+        System.out.print("Tên đăng nhập: ");
         String u = sc.nextLine();
-        // Thoát hiểm nếu đang gõ dở mà đổi ý
-        if (u.equals("0")) return;
+        if (u.equals("0") || u.isEmpty()) return;
 
         System.out.print("Mật khẩu: "); String p = sc.nextLine();
+        if (p.equals("0") || p.isEmpty()) return;
         System.out.print("Họ và Tên thật: "); String n = sc.nextLine();
+        if (n.equals("0") || n.isEmpty()) return;
         System.out.print("Số điện thoại: "); String ph = sc.nextLine();
+        if (ph.equals("0") || ph.isEmpty()) return;
 
         boolean ok = false;
         if (r.equals("1")) {
             ok = auth.registerParent(u, p, n, ph);
         } else {
-            System.out.print("Môn dạy (VD: Toán, Lý): "); String sub = sc.nextLine();
-            System.out.print("Lớp dạy (VD: Lớp 10, Lớp 12): "); String gr = sc.nextLine();
-            System.out.print("Quận khu vực (VD: Cầu Giấy): "); String ar = sc.nextLine();
+            System.out.print("Môn dạy: "); String sub = sc.nextLine();
+            if (sub.equals("0") || sub.isEmpty()) return;
+            System.out.print("Lớp dạy: "); String gr = sc.nextLine();
+            if (gr.equals("0") || gr.isEmpty()) return;
+            System.out.print("khu vực: "); String ar = sc.nextLine();
+            if (ar.equals("0") || ar.isEmpty()) return;
             ok = auth.registerTutor(u, p, n, ph, sub, gr, ar);
         }
 
-        if (ok) System.out.println("Chúc mừng! Đăng ký thành công.");
-        else System.out.println("LỖI: Tên đăng nhập này đã có người sử dụng!");
+        if (ok) System.out.println(" Đăng ký thành công.");
+        else System.out.println("LỖI: Tên đăng nhập đã tồn tại!");
     }
 
-    // ==============================================
+
     // CÁC MENU ĐIỀU HƯỚNG
-    // ==============================================
     static void showParent() {
         System.out.println("\n--- MENU PHỤ HUYNH ---");
-        System.out.println("1. Tìm Gia sư (Xem SĐT / Đánh giá)");
+        System.out.println("1. Tìm Gia sư");
         System.out.println("2. Đăng bài tìm gia sư");
         System.out.println("3. Các bài đăng của tôi");
         System.out.println("0. Đăng xuất");
@@ -125,9 +124,9 @@ public class Main {
         Tutor t = (Tutor) loggedUser;
         String st = (t.getStatus() == 1) ? "ĐÃ DUYỆT" : "CHỜ DUYỆT";
         System.out.println("\n--- MENU GIA SƯ [" + st + "] ---");
-        System.out.println("1. Tìm lớp đăng ký dạy");
-        System.out.println("2. Xem chỉ số đánh giá của tôi");
-        System.out.println("3. Quản lý các lớp đã đăng ký (Hủy nhận lớp)"); // Đã thêm lựa chọn số 3
+        System.out.println("1. Tìm bài đăng ");
+        System.out.println("2. các bài đã đăng kí");
+        System.out.println("3. xem đánh giá");
         System.out.println("0. Đăng xuất");
         System.out.print("Chọn: ");
 
@@ -136,16 +135,17 @@ public class Main {
                 if(t.getStatus() == 1) tMan.findJobPosts(t);
                 else System.out.println("Tài khoản chưa được Admin duyệt, không thể tìm lớp!");
                 break;
-            case "2": tMan.viewReviews(t); break;
-            case "3": tMan.manageMyRegistrations(t); break; // Gọi hàm mới tạo
+
+            case "2": tMan.manageMyRegistrations(t); break; // Gọi hàm mới tạo
+            case "3": tMan.viewReviews(t); break;
             case "0": loggedUser = null; break;
         }
     }
 
     static void showAdmin() {
         System.out.println("\n--- MENU ADMIN ---");
-        System.out.println("1. Duyệt / Khóa Gia sư");
-        System.out.println("2. Duyệt bài đăng tìm Gia sư");
+        System.out.println("1. Duyệt tài khoản Gia sư");
+        System.out.println("2. Duyệt bài đăng");
         System.out.println("0. Đăng xuất");
         System.out.print("Chọn: ");
 
