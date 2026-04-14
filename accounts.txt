@@ -1,3 +1,5 @@
-ID,Username,Password,Role,Phone
-a1,admin,admin123,ADMIN,N/A
-p1,hoang,123,PARENT,07583453
+--- DANH SÁCH TÀI KHOẢN ---
+ID: admin1 | Tài khoản: admin | Mật khẩu: admin | Vai trò: ADMIN
+ID: p1 | Tài khoản: hoang | Mật khẩu: 123 | Vai trò: PARENT
+ID: t1 | Tài khoản: giang | Mật khẩu: 123 | Vai trò: TUTOR
+ID: p2 | Tài khoản: 1 | Mật khẩu: 0 | Vai trò: PARENT

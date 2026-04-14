@@ -1,140 +1,165 @@
 package com.tutorfinder.managers;
 
-import com.tutorfinder.data.DataStore;
+import com.tutorfinder.data.Database;
 import com.tutorfinder.model.*;
 import java.util.Scanner;
 
 public class ParentManager {
-    private DataStore db = DataStore.getInstance();
     private Scanner sc;
 
     public ParentManager(Scanner sc) { this.sc = sc; }
 
-    public void findTutors(Parent p) {
-        System.out.println("\n--- TÌM KIẾM GIA SƯ ---");
-        System.out.print("Lọc theo môn (Enter để xem tất cả): "); String sub = sc.nextLine().trim();
+    // 1. Chức năng Tìm Gia sư
+    public void findTutors() {
+        System.out.println("\n--- TÌM KIẾM GIA SƯ (Nhập 0 để Hủy) ---");
+        System.out.print("- Môn học (VD: Toán): "); String sub = sc.nextLine();
 
-        db.users.stream()
-                .filter(u -> u instanceof Tutor && ((Tutor) u).getStatus() == 1)
-                .map(u -> (Tutor) u)
-                .filter(t -> sub.isEmpty() || t.getSubject().equalsIgnoreCase(sub))
-                .sorted((t1, t2) -> Double.compare(t2.getRating(), t1.getRating())) // Xếp sao giảm dần
-                .forEach(t -> System.out.printf("ID: %s | Tên: %s | Môn: %s | Sao: %.1f | Lượt ĐG: %d\n",
-                        t.getId(), t.getUsername(), t.getSubject(), t.getRating(), t.getReviewCount()));
+        if (sub.equals("0")) return; // Nút thoát hiểm
 
-        System.out.print("\nNhập ID Gia sư để gửi Yêu cầu (Enter bỏ qua): "); String tId = sc.nextLine().trim();
-        if (!tId.isEmpty() && db.getUserById(tId) != null) {
-            System.out.print("Môn học: "); String m = sc.nextLine();
-            System.out.print("Số tiền/buổi: "); double fee = Double.parseDouble(sc.nextLine());
-            System.out.print("Số phút/buổi: "); int min = Integer.parseInt(sc.nextLine());
+        System.out.print("- Lớp (VD: Lớp 10): "); String gr = sc.nextLine();
+        System.out.print("- Quận (VD: Cầu Giấy): "); String ar = sc.nextLine();
 
-            db.requests.add(new Request(db.genId("r"), p.getId(), tId, m, fee, min));
-            DataStore.saveData();
-            System.out.println("Gửi yêu cầu thành công!");
+        System.out.println("\n--- DANH SÁCH GIA SƯ PHÙ HỢP ---");
+        boolean found = false;
+        for (User u : Database.getInstance().users) {
+            if (u instanceof Tutor t && t.getStatus() == 1) {
+                if (t.getSubjects().toLowerCase().contains(sub.toLowerCase()) &&
+                        t.getGrades().toLowerCase().contains(gr.toLowerCase()) &&
+                        t.getArea().toLowerCase().contains(ar.toLowerCase())) {
+
+                    System.out.printf("[%s] - %s | %.1f Sao / %d lượt ĐG\n",
+                            t.getId(), t.getName(), t.getRating(), t.getReviewCount());
+                    found = true;
+                }
+            }
+        }
+
+        if (!found) {
+            System.out.println("Rất tiếc, không tìm thấy Gia sư nào khớp yêu cầu.");
+            return;
+        }
+
+        System.out.println("\n1. Xem SĐT & Hồ sơ chi tiết | 2. Đánh giá Gia sư | 0. Quay lại");
+        System.out.print("Chọn thao tác: "); String choice = sc.nextLine();
+
+        if (choice.equals("1")) {
+            System.out.print("Nhập Mã ID Gia sư (hoặc Enter để thoát): "); String id = sc.nextLine();
+            if (id.isEmpty()) return;
+
+            for (User u : Database.getInstance().users) {
+                if (u.getId().equalsIgnoreCase(id) && u instanceof Tutor t) {
+                    System.out.println("\n--- HỒ SƠ CHI TIẾT ---");
+                    System.out.println("Họ tên: " + t.getName());
+                    System.out.println("SĐT Liên hệ: " + t.getPhone());
+                    System.out.println("Khu vực: " + t.getArea());
+                    System.out.println("Môn dạy: " + t.getSubjects() + " | Lớp: " + t.getGrades());
+                    System.out.println("Uy tín: " + t.getRating() + " Sao / " + t.getReviewCount() + " lượt");
+                }
+            }
+        }
+        else if (choice.equals("2")) {
+            System.out.print("Nhập Mã ID Gia sư muốn đánh giá (Enter để thoát): "); String id = sc.nextLine();
+            if (id.isEmpty()) return;
+
+            for (User u : Database.getInstance().users) {
+                if (u.getId().equalsIgnoreCase(id) && u instanceof Tutor t) {
+                    System.out.print("Nhập số sao bạn muốn chấm (1 đến 5): ");
+                    double star = Double.parseDouble(sc.nextLine());
+                    t.addReview(star);
+                    Database.save();
+                    System.out.println("Cảm ơn bạn đã đánh giá!");
+                }
+            }
         }
     }
 
+    // 2. Chức năng Đăng bài
     public void createJobPost(Parent p) {
-        System.out.println("\n--- ĐĂNG BÀI TÌM GIA SƯ ---");
-        System.out.print("Môn học: "); String m = sc.nextLine();
-        System.out.print("Số tiền/buổi: "); double fee = Double.parseDouble(sc.nextLine());
-        System.out.print("Số phút/buổi: "); int min = Integer.parseInt(sc.nextLine());
+        System.out.println("\n--- ĐĂNG BÀI TÌM GIA SƯ (Nhập 0 để Hủy) ---");
+        System.out.print("Môn học yêu cầu: "); String sub = sc.nextLine();
 
-        db.jobPosts.add(new JobPost(db.genId("jp"), p.getId(), m, fee, min));
-        DataStore.saveData();
-        System.out.println("Đăng bài thành công!");
+        if (sub.equals("0")) return;
+
+        System.out.print("Lớp yêu cầu: "); String gr = sc.nextLine();
+        System.out.print("Khu vực / Quận: "); String ar = sc.nextLine();
+        System.out.print("Giá trả trên 1 buổi (VNĐ): "); double pr = Double.parseDouble(sc.nextLine());
+
+        String jpId = "jp" + (Database.getInstance().jIdx++);
+        Database.getInstance().posts.add(new JobPost(jpId, p.getId(), sub, gr, ar, pr));
+        Database.save();
+        System.out.println("Đăng bài thành công! Vui lòng chờ Admin duyệt để hiển thị.");
     }
 
-    public void manageRequests(Parent p) {
-        System.out.println("\n--- CÁC ĐƠN YÊU CẦU ĐÃ GỬI ---");
-        for (Request r : db.requests) {
-            if (r.getParentId().equals(p.getId())) {
-                String st = r.getStatus() == 0 ? "Chờ GS nhận" : (r.getStatus() == 1 ? "Đã nhận (Mã lớp: "+r.getCourseId()+")" : "Từ chối/Hủy");
-                System.out.printf("Mã YC: %s | ID GS: %s | Trạng thái: %s\n", r.getId(), r.getTutorId(), st);
-            }
-        }
-        System.out.print("Nhập Mã YC muốn hủy (Enter bỏ qua): "); String rId = sc.nextLine().trim();
-        for (Request r : db.requests) {
-            if (r.getId().equals(rId) && r.getParentId().equals(p.getId()) && r.getStatus() == 0) {
-                r.setStatus(-1);
-                DataStore.saveData();
-                System.out.println("Đã hủy yêu cầu!");
-                return;
-            }
-        }
-    }
-
-    public void manageJobPosts(Parent p) {
+    // 3. Chức năng Quản lý bài đăng (CẬP NHẬT TÍNH NĂNG XÓA BÀI)
+    public void manageMyPosts(Parent p) {
         System.out.println("\n--- CÁC BÀI ĐĂNG CỦA TÔI ---");
-        for (JobPost jp : db.jobPosts) {
+        boolean hasPost = false;
+
+        for (JobPost jp : Database.getInstance().posts) {
             if (jp.getParentId().equals(p.getId())) {
-                System.out.printf("Mã BĐ: %s | Môn: %s | Số GS đăng ký: %d\n", jp.getId(), jp.getSubject(), jp.getRegisteredTutorIds().size());
+                String st = jp.getStatus() == 1 ? "Đã duyệt (Đang hiện)" : "Đang chờ duyệt";
+                System.out.printf("Mã bài: %s | Môn: %s | Lớp: %s | Trạng thái: %s | Có %d GS đăng ký\n",
+                        jp.getId(), jp.getSubject(), jp.getGrade(), st, jp.getRegisteredTutorIds().size());
+                hasPost = true;
             }
         }
-        System.out.print("Nhập Mã BĐ để chọn Gia sư (Enter bỏ qua): "); String jpId = sc.nextLine().trim();
-        for (JobPost jp : db.jobPosts) {
-            if (jp.getId().equals(jpId) && jp.getParentId().equals(p.getId())) {
-                System.out.println("Danh sách Gia sư đã đăng ký:");
-                for (String tId : jp.getRegisteredTutorIds()) {
-                    Tutor t = (Tutor) db.getUserById(tId);
-                    System.out.printf("- ID: %s | Tên: %s | SĐT: %s | Sao: %.1f\n", t.getId(), t.getUsername(), t.getPhone(), t.getRating());
-                }
-                System.out.print("Nhập ID Gia sư bạn muốn chọn: "); String cTid = sc.nextLine().trim();
-                if (jp.getRegisteredTutorIds().contains(cTid)) {
-                    // Tạo lớp học, trạng thái 0 (Chờ GS mở)
-                    Course c = new Course(db.genId("c"), p.getId(), cTid, jp.getFeePerSession());
-                    db.courses.add(c);
-                    DataStore.saveData();
-                    System.out.println("Chọn thành công! Đã tạo lớp " + c.getId() + ". Vui lòng chờ GS mở lớp.");
-                }
+
+        if (!hasPost) {
+            System.out.println("Bạn chưa có bài đăng nào trên hệ thống.");
+            return;
+        }
+
+        System.out.print("\nNhập Mã bài đăng để thao tác (Hoặc Enter để Thoát): ");
+        String jpId = sc.nextLine();
+        if (jpId.isEmpty()) return; // Nút thoát hiểm
+
+        // Tìm bài đăng theo Mã ID
+        JobPost selectedPost = null;
+        for (JobPost jp : Database.getInstance().posts) {
+            if (jp.getId().equalsIgnoreCase(jpId) && jp.getParentId().equals(p.getId())) {
+                selectedPost = jp;
+                break;
             }
         }
-    }
 
-    public void manageCourses(Parent p) {
-        System.out.println("\n--- CÁC LỚP HỌC ---");
-        for (Course c : db.courses) {
-            if (c.getParentId().equals(p.getId())) {
-                Tutor t = (Tutor) db.getUserById(c.getTutorId());
-                String st = c.getStatus() == 0 ? "CHỜ GS MỞ LỚP" : (c.getStatus() == 1 ? "ĐÃ MỞ - CHỜ THANH TOÁN" : (c.getStatus() == 2 ? "ĐANG HỌC" : "ĐÃ KẾT THÚC"));
-                System.out.printf("Mã Lớp: %s | GS: %s | SĐT: %s | Phí: %.0f | TT: %s\n", c.getId(), t.getUsername(), t.getPhone(), c.getFeePerSession(), st);
-            }
+        // Báo lỗi nếu nhập sai mã
+        if (selectedPost == null) {
+            System.out.println("Lỗi: Không tìm thấy bài đăng này!");
+            return;
         }
-        System.out.println("1. Vào học (Thanh toán) | 2. Đánh giá | 3. Khiếu nại | 0. Thoát");
-        System.out.print("Chọn: "); String opt = sc.nextLine();
 
-        if (opt.equals("1")) {
-            System.out.print("Nhập Mã Lớp muốn vào: "); String cId = sc.nextLine();
-            for (Course c : db.courses) {
-                if (c.getId().equals(cId) && c.getParentId().equals(p.getId())) {
-                    if (c.getStatus() == 0) { System.out.println("Lớp chưa được Gia sư mở!"); return; }
-                    if (c.getStatus() >= 2) { System.out.println("Bạn đã ở trong lớp này hoặc lớp đã kết thúc!"); return; }
+        // Hiện Menu thao tác cho Bài đăng vừa chọn
+        System.out.println("\n--- THAO TÁC BÀI ĐĂNG [" + selectedPost.getId() + "] ---");
+        System.out.println("1. Xem danh sách Gia sư muốn nhận lớp");
+        System.out.println("2. Xóa bài đăng này");
+        System.out.println("0. Quay lại");
+        System.out.print("Chọn thao tác: ");
+        String choice = sc.nextLine();
 
-                    if (p.withdrawMoney(c.getFeePerSession())) {
-                        Tutor t = (Tutor) db.getUserById(c.getTutorId());
-                        t.addMoney(c.getFeePerSession()); // Chuyển tiền cho GS
-                        c.setStatus(2); // Trạng thái Đang học
-                        DataStore.saveData();
-                        System.out.println("Thanh toán thành công! Bạn đã VÀO HỌC.");
-                    } else {
-                        System.out.println("Số dư ví không đủ, vui lòng nạp thêm!");
+        if (choice.equals("1")) {
+            System.out.println(">> DANH SÁCH GIA SƯ MUỐN NHẬN LỚP:");
+            if (selectedPost.getRegisteredTutorIds().isEmpty()) {
+                System.out.println("Hiện chưa có Gia sư nào đăng ký lớp này.");
+            } else {
+                for (String tId : selectedPost.getRegisteredTutorIds()) {
+                    for (User u : Database.getInstance().users) {
+                        if (u.getId().equals(tId) && u instanceof Tutor t) {
+                            System.out.printf("- Gia sư: %s | SĐT: %s | Uy tín: %.1f Sao\n",
+                                    t.getName(), t.getPhone(), t.getRating());
+                        }
                     }
                 }
             }
-        } else if (opt.equals("2")) {
-            System.out.print("Nhập ID Gia sư: "); String tId = sc.nextLine();
-            System.out.print("Chấm sao (1-5): "); double star = Double.parseDouble(sc.nextLine());
-            Tutor t = (Tutor) db.getUserById(tId);
-            if (t != null) { t.addReview(star); DataStore.saveData(); System.out.println("Đánh giá thành công!"); }
-        } else if (opt.equals("3")) {
-            System.out.print("Nhập Mã Lớp cần khiếu nại: "); String cId = sc.nextLine();
-            System.out.print("Lý do khiếu nại: "); String reason = sc.nextLine();
-            System.out.print("Số tiền yêu cầu hoàn: "); double amount = Double.parseDouble(sc.nextLine());
-            Course c = null; for(Course co : db.courses) if(co.getId().equals(cId)) c = co;
-            if (c != null) {
-                db.complaints.add(new Complaint(db.genId("comp"), p.getId(), c.getTutorId(), c.getId(), reason, amount));
-                DataStore.saveData();
-                System.out.println("Đã gửi đơn khiếu nại cho Admin xử lý!");
+        }
+        else if (choice.equals("2")) {
+            // Xác nhận lần cuối trước khi xóa
+            System.out.print("Bạn có CHẮC CHẮN muốn xóa bài đăng này không? (y/n): ");
+            if (sc.nextLine().equalsIgnoreCase("y")) {
+                Database.getInstance().posts.remove(selectedPost); // Xóa khỏi danh sách RAM
+                Database.save(); // Lưu đè danh sách mới xuống ổ cứng
+                System.out.println("Đã xóa bài đăng vĩnh viễn!");
+            } else {
+                System.out.println("Đã hủy thao tác xóa.");
             }
         }
     }

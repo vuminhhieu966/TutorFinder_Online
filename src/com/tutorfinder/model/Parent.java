@@ -2,9 +2,13 @@ package com.tutorfinder.model;
 
 public class Parent extends User {
     private static final long serialVersionUID = 1L;
-    public Parent(String id, String username, String password, String phone) {
-        super(id, username, password, phone);
+
+    public Parent(String id, String username, String password, String name, String phone) {
+        super(id, username, password, name, phone);
     }
+
     @Override
-    public String getRole() { return "PARENT"; }
+    public String getRole() {
+        return "PARENT";
+    }
 }
