@@ -11,6 +11,7 @@ public class AdminManager {
 
     // 1. Chức năng Duyệt Gia sư
     public void manageTutors() {
+        Database.load();
         System.out.println("\n--- DANH SÁCH GIA SƯ ĐANG CHỜ DUYỆT ---");
         boolean hasPending = false;
         for (User u : Database.getInstance().users) {
@@ -44,6 +45,7 @@ public class AdminManager {
 
     // 2. Chức năng Duyệt bài đăng của Phụ huynh
     public void manageJobPosts() {
+        Database.load();
         System.out.println("\n--- DANH SÁCH BÀI ĐĂNG CHỜ DUYỆT ---");
         boolean hasPending = false;
         for (JobPost jp : Database.getInstance().posts) {
@@ -75,6 +77,7 @@ public class AdminManager {
     }
     // hiện tài khoản hệ thống
     public void viewAllAccounts() {
+        Database.load();
         System.out.println("\n--- TẤT CẢ TÀI KHOẢN TRÊN HỆ THỐNG ---");
 
         for (User u : Database.getInstance().users) {
@@ -95,6 +98,7 @@ public class AdminManager {
 
     // Tính năng: Đặt lại mật khẩu cho người dùng
     public void resetUserPassword() {
+        Database.load();
         System.out.println("\n--- ĐẶT LẠI MẬT KHẨU ---");
         System.out.print("Nhập ID tài khoản cần Reset (Enter để quay lại): ");
         String targetId = sc.nextLine();
@@ -109,10 +113,10 @@ public class AdminManager {
                     return;
                 }
 
-                // đưa về mật khẩu mặc định là 123
-                u.setPassword("123");
+                // đưa về mật khẩu mặc định là 123456
+                u.setPassword("123456");
                 Database.save(); // Lưu ngay xuống ổ cứng
-                System.out.println("Thành công! Mật khẩu của tài khoản [" + u.getUsername() + "] được cấp lại là: 123");
+                System.out.println("Thành công! Mật khẩu của tài khoản [" + u.getUsername() + "] được cấp lại là: 123456");
                 return;
             }
         }

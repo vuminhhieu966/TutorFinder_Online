@@ -10,13 +10,15 @@ public class TutorManager {
     public TutorManager(Scanner sc) { this.sc = sc; }
 
     // 1. Tìm bài đăng để nhận lớp
+
     public void findJobPosts(Tutor t) {
+        Database.load();
         System.out.println("\n--- TÌM BÀI ĐĂNG (Nhập 0 thoát) ---");
         System.out.print("- Lọc theo Môn: "); String sub = sc.nextLine();
 
         if (sub.equals("0")) return; // Nút thoát
 
-        System.out.print("- Lọc theo Quận: "); String ar = sc.nextLine();
+        System.out.print("- Lọc theo khu vực: "); String ar = sc.nextLine();
         if (ar.equals("0")) return; // Nút thoát
 
         System.out.println("\n--- DANH SÁCH BÀI ĐĂNG ---");
@@ -54,19 +56,36 @@ public class TutorManager {
 
     // 2. xem Đánh giá
     public void viewReviews(Tutor t) {
-        System.out.println("\n--- THỐNG KÊ UY TÍN CỦA TÔI ---");
-        System.out.printf("Chỉ số đánh giá: %.1f Sao / %d lượt đánh giá\n", t.getRating(), t.getReviewCount());
+        // 1. Ép hệ thống tải lại dữ liệu mới nhất từ ổ cứng (F5)
+        Database.load();
+
+        // 2. Tìm lại đúng ông Gia sư này trong danh sách mới vừa tải lên
+        Tutor freshTutor = null;
+        for (User u : Database.getInstance().users) {
+            if (u.getId().equals(t.getId())) {
+                freshTutor = (Tutor) u;
+                break;
+            }
+        }
+
+        // 3. In ra điểm số mới nhất với format %.1f
+        if (freshTutor != null) {
+            System.out.println("\n--- THỐNG KÊ UY TÍN CỦA TÔI ---");
+            System.out.printf("Chỉ số đánh giá: %.1f Sao / %d lượt đánh giá\n",
+                    freshTutor.getRating(), freshTutor.getReviewCount());
+        }
     }
 
     // 3. Quản lý các lớp đã đăng ký
     public void manageMyRegistrations(Tutor t) {
+        Database.load(); // Đảm bảo thấy được nếu Phụ huynh đã xóa bài
+
         System.out.println("\n--- CÁC LỚP TÔI ĐÃ ĐĂNG KÝ (Nhập 0 để Quay lại) ---");
         boolean hasRegistered = false;
 
-        // Quét toàn bộ hệ thống xem Gia sư này đang có tên ở những bài nào
         for (JobPost jp : Database.getInstance().posts) {
             if (jp.getRegisteredTutorIds().contains(t.getId())) {
-                System.out.printf("Mã bài: %s | Môn: %s | Lớp: %s | Quận: %s | Giá: %.0f VNĐ\n",
+                System.out.printf("Mã bài: %s | Môn: %s | Lớp: %s | Quận: %s | Giá: %,.0f VNĐ\n",
                         jp.getId(), jp.getSubject(), jp.getGrade(), jp.getArea(), jp.getPrice());
                 hasRegistered = true;
             }
@@ -78,67 +97,60 @@ public class TutorManager {
         }
 
         System.out.print("\nNhập Mã bài đăng để HỦY ĐĂNG KÝ (Enter để Thoát): ");
-        String jid = sc.nextLine();
-        if (jid.isEmpty() || jid.equals("0")) return; // Nút thoát
+        String jid = sc.nextLine().trim();
+        if (jid.isEmpty() || jid.equals("0")) return;
 
         for (JobPost jp : Database.getInstance().posts) {
             if (jp.getId().equalsIgnoreCase(jid)) {
-                // Rút tên Gia sư ra khỏi danh sách của bài đăng đó
                 if (jp.getRegisteredTutorIds().contains(t.getId())) {
-                    jp.getRegisteredTutorIds().remove(t.getId()); // Gỡ ID gia sư
-                    Database.save(); // Lưu đè xuống ổ cứng
+                    jp.getRegisteredTutorIds().remove(t.getId());
+                    Database.save();
                     System.out.println("Đã hủy đăng ký thành công!");
-                    return;
-                } else {
-                    System.out.println("Lỗi: Bạn chưa đăng ký bài này!");
                     return;
                 }
             }
         }
-        System.out.println("Lỗi: Không tìm thấy Mã bài đăng này!");
+        System.out.println("Lỗi: Không tìm thấy Mã bài đăng này trong danh sách đăng ký!");
     }
-    // 4. TÍNH NĂNG MỚI: Sửa thông tin hồ sơ
+    // 4. Sửa thông tin hồ sơ - CẬP NHẬT: Load lại để tránh đè dữ liệu cũ
     public void editProfile(Tutor t) {
+        Database.load(); // Load lại để lấy thông tin mới nhất
+
+        // Tìm lại chính đối tượng trong danh sách mới load để đảm bảo sửa đúng đối tượng trong RAM
+        Tutor freshTutor = null;
+        for(User u : Database.getInstance().users) {
+            if(u.getId().equals(t.getId())) {
+                freshTutor = (Tutor) u;
+                break;
+            }
+        }
+
+        if(freshTutor == null) return;
+
         System.out.println("\n--- CẬP NHẬT HỒ SƠ GIA SƯ ---");
         System.out.println("LƯU Ý: Sau khi cập nhật, tài khoản sẽ chuyển về trạng thái [CHỜ DUYỆT].");
-        System.out.println(" Nhấn (Enter/0) để giữ nguyên thông tin cũ.");
 
-        System.out.print("Họ Tên hiện tại (" + t.getName() + ") -> Mới: ");
-        String name = sc.nextLine();
-        if (name.equals("0")) return; // Nút thoát
+        System.out.print("Họ Tên hiện tại (" + freshTutor.getName() + ") -> Mới: ");
+        String name = sc.nextLine().trim();
+        if (name.equals("0")) return;
 
-        System.out.print("SĐT hiện tại (" + t.getPhone() + ") -> Mới: ");
-        String phone = sc.nextLine();
-        if (phone.equals("0")) return;
+        System.out.print("SĐT hiện tại (" + freshTutor.getPhone() + ") -> Mới: ");
+        String phone = sc.nextLine().trim();
 
-        System.out.print("Môn dạy hiện tại (" + t.getSubjects() + ") -> Mới: ");
-        String subjects = sc.nextLine();
-        if (subjects.equals("0")) return;
 
-        System.out.print("Lớp dạy hiện tại (" + t.getGrades() + ") -> Mới: ");
-        String grades = sc.nextLine();
-        if (grades.equals("0")) return;
-
-        System.out.print("Quận/Khu vực hiện tại (" + t.getArea() + ") -> Mới: ");
-        String area = sc.nextLine();
-        if (area.equals("0")) return;
-
-        System.out.print("\nBạn có chắc chắn muốn lưu thay đổi và gửi Admin duyệt lại? (y/n): ");
+        System.out.print("\nBạn có chắc chắn lưu thay đổi và gửi Admin duyệt lại? (y/n): ");
         if (sc.nextLine().equalsIgnoreCase("y")) {
-            // Nếu người dùng có gõ chữ mới (không để trống), thì cập nhật
-            if (!name.isEmpty()) t.setName(name);
-            if (!phone.isEmpty()) t.setPhone(phone);
-            if (!subjects.isEmpty()) t.setSubjects(subjects);
-            if (!grades.isEmpty()) t.setGrades(grades);
-            if (!area.isEmpty()) t.setArea(area);
+            if (!name.isEmpty()) freshTutor.setName(name);
+            if (!phone.isEmpty()) freshTutor.setPhone(phone);
 
-            // Giáng cấp về trạng thái Chờ duyệt
+            freshTutor.setStatus(0); // Giáng cấp
+            Database.save();
+
+            // Cập nhật ngược lại cho biến t ở Main để menu hiển thị đúng
+            t.setName(freshTutor.getName());
             t.setStatus(0);
 
-            Database.save(); // Lưu ngay xuống ổ cứng
-            System.out.println("Cập nhật thành công! Vui lòng chờ Admin duyệt lại hồ sơ nhé.");
-        } else {
-            System.out.println("Đã hủy cập nhật.");
+            System.out.println("Cập nhật thành công! Vui lòng chờ Admin duyệt lại hồ sơ.");
         }
     }
 }

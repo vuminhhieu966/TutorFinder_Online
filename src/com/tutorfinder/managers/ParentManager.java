@@ -9,17 +9,18 @@ public class ParentManager {
 
     public ParentManager(Scanner sc) { this.sc = sc; }
 
-    //  Tìm Gia sư
+    // Tìm Gia sư, xem thông tin, đánh giá
     public void findTutors() {
-        System.out.println("\n--- TÌM KIẾM GIA SƯ (Nhập 0 để thoát) ---");
-        System.out.print("- Môn học: "); String sub = sc.nextLine();
+        Database.load();
+        System.out.println("\n--- TÌM KIẾM GIA SƯ ('0' để thoát) ---");
+        System.out.print("- Môn học: "); String sub = sc.nextLine().trim();
+        if (sub.equals("0")) return;
 
-        if (sub.equals("0")) return; // Nút thoát
+        System.out.print("- Lớp: "); String gr = sc.nextLine().trim();
+        if (gr.equals("0")) return;
 
-        System.out.print("- Lớp: "); String gr = sc.nextLine();
-        if (gr.equals("0")) return; // Nút thoát
-        System.out.print("- Khu vực: "); String ar = sc.nextLine();
-        if (ar.equals("0")) return; // Nút thoát
+        System.out.print("- Khu vực: "); String ar = sc.nextLine().trim();
+        if (ar.equals("0")) return;
 
         System.out.println("\n--- DANH SÁCH GIA SƯ ---");
         boolean found = false;
@@ -29,54 +30,77 @@ public class ParentManager {
                         t.getGrades().toLowerCase().contains(gr.toLowerCase()) &&
                         t.getArea().toLowerCase().contains(ar.toLowerCase())) {
 
-                    System.out.printf("[%s] - %s | môn dạy: %s | lớp: %s | khu vực: %s\n",
-                            t.getId(), t.getName(), t.getSubjects(), t.getGrades(),t.getArea());
+                    System.out.printf("[%s] - %s | Môn dạy: %s | Lớp: %s | Khu vực: %s\n",
+                            t.getId(), t.getName(), t.getSubjects(), t.getGrades(), t.getArea());
                     found = true;
                 }
             }
         }
 
         if (!found) {
-            System.out.println("Không tìm thấy Gia sư nào.");
+            System.out.println("Không tìm thấy Gia sư nào phù hợp.");
             return;
         }
 
-        System.out.println("\n1.Thông tin chi tiết | 2. Đánh giá Gia sư | 0. Quay lại");
-        System.out.print("Chọn thao tác: "); String choice = sc.nextLine();
+        System.out.print("\nNhập Mã ID Gia sư để thao tác (Hoặc Enter để thoát): ");
+        String targetId = sc.nextLine().trim();
+        if (targetId.isEmpty()) return;
 
-        if (choice.equals("1")) {
-            System.out.print("Nhập Mã ID Gia sư (hoặc Enter để thoát): "); String id = sc.nextLine();
-            if (id.isEmpty()) return;
-
-            for (User u : Database.getInstance().users) {
-                if (u.getId().equalsIgnoreCase(id) && u instanceof Tutor t) {
-                    System.out.println("\n--- HỒ SƠ CHI TIẾT ---");
-                    System.out.println("Họ tên: " + t.getName());
-                    System.out.println("SĐT Liên hệ: " + t.getPhone());
-                    System.out.println("Khu vực: " + t.getArea());
-                    System.out.println("Môn dạy: " + t.getSubjects() + " | Lớp: " + t.getGrades());
-                    System.out.println("Uy tín: " + t.getRating() + " Sao / " + t.getReviewCount() + " lượt");
-                }
+        // Dò tìm xem ID vừa nhập có tồn tại và là Gia sư không
+        Tutor selectedTutor = null;
+        for (User u : Database.getInstance().users) {
+            if (u.getId().equalsIgnoreCase(targetId) && u instanceof Tutor t && t.getStatus() == 1) {
+                selectedTutor = t;
+                break;
             }
         }
-        else if (choice.equals("2")) {
-            System.out.print("Nhập Mã ID Gia sư muốn đánh giá (Enter để thoát): "); String id = sc.nextLine();
-            if (id.isEmpty()) return;
 
-            for (User u : Database.getInstance().users) {
-                if (u.getId().equalsIgnoreCase(id) && u instanceof Tutor t) {
-                    System.out.print("Đánh giá (1 đến 5sao)): ");
-                    double star = Double.parseDouble(sc.nextLine());
-                    t.addReview(star);
-                    Database.save();
-                    System.out.println("đánh giá thành công!");
+        if (selectedTutor == null) {
+            System.out.println("Lỗi: nhập sai Id!");
+            return;
+        }
+
+        // --- LUỒNG MỚI: CHỌN HÀNH ĐỘNG SAU ---
+        System.out.println("\n--- THAO TÁC VỚI GIA SƯ: " + selectedTutor.getName().toUpperCase() + " ---");
+        System.out.println("1. Xem Thông tin chi tiết | 2. Đánh giá Gia sư | 0. Quay lại");
+        System.out.print("Chọn thao tác: ");
+        String choice = sc.nextLine().trim();
+
+        if (choice.equals("1")) {
+            System.out.println("\n--- HỒ SƠ CHI TIẾT ---");
+            System.out.println("- Họ tên: " + selectedTutor.getName());
+            System.out.println("- SĐT Liên hệ: " + selectedTutor.getPhone());
+            System.out.println("- Khu vực: " + selectedTutor.getArea());
+            System.out.println("- Môn dạy: " + selectedTutor.getSubjects() + " | Lớp: " + selectedTutor.getGrades());
+            System.out.println("- Uy tín: " + selectedTutor.getRating() + " Sao / " + selectedTutor.getReviewCount() + " lượt đánh giá");
+        }
+        else if (choice.equals("2")) {
+            double star = 0;
+            // Vòng lặp bọc giáp chống sập App khi nhập sai định dạng
+            while (true) {
+                try {
+                    System.out.print("Nhập điểm đánh giá (Từ 1 đến 5 sao): ");
+                    star = Double.parseDouble(sc.nextLine().trim());
+
+                    if (star >= 1 && star <= 5) {
+                        break; // Nhập chuẩn thì thoát vòng lặp đi tiếp
+                    } else {
+                        System.out.println("Lỗi: phải trong khoảng 1-5 sao!");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Lỗi:Vui lòng chỉ nhập số 1-5!");
                 }
             }
+
+            selectedTutor.addReview(star);
+            Database.save(); // Lưu ngay xuống ổ cứng
+            System.out.println("Đánh giá " + star + " sao cho Gia sư [" + selectedTutor.getName() + "] thành công.");
         }
     }
 
     // 2. Chức năng Đăng bài
     public void createJobPost(Parent p) {
+        Database.load();
         System.out.println("\n--- ĐĂNG BÀI TÌM GIA SƯ ---");
 
         System.out.print("Môn: ");
@@ -124,14 +148,16 @@ public class ParentManager {
 
     // 3. Chức năng Quản lý bài đăng
     public void manageMyPosts(Parent p) {
+        Database.load();
         System.out.println("\n--- CÁC BÀI ĐĂNG CỦA TÔI ---");
         boolean hasPost = false;
 
         for (JobPost jp : Database.getInstance().posts) {
             if (jp.getParentId().equals(p.getId())) {
                 String st = jp.getStatus() == 1 ? "Đã duyệt" : "Đang chờ duyệt";
-                System.out.printf("Mã bài: %s | Môn: %s | Lớp: %s | khu vực: %s | %f/buổi| Trạng thái: %s | Có %d gia sư đăng ký\n",
-                        jp.getId(), jp.getSubject(), jp.getGrade(),jp.getArea(), jp.getPrice() , st, jp.getRegisteredTutorIds().size());
+
+                System.out.printf("Mã bài: %s | Môn: %s | Lớp: %s | Khu vực: %s | %,.0f VNĐ/buổi | Trạng thái: %s | Có %d gia sư đăng ký\n",
+                        jp.getId(), jp.getSubject(), jp.getGrade(), jp.getArea(), jp.getPrice(), st, jp.getRegisteredTutorIds().size());
                 hasPost = true;
             }
         }
@@ -142,8 +168,8 @@ public class ParentManager {
         }
 
         System.out.print("\nNhập Mã bài đăng để thao tác (Hoặc Enter để Thoát): ");
-        String jpId = sc.nextLine();
-        if (jpId.isEmpty()) return; // Nút thoát
+        String jpId = sc.nextLine().trim(); // Thêm trim() để lỡ gõ thừa dấu cách vẫn nhận diện được mã
+        if (jpId.isEmpty() || jpId.equals("0")) return; // Nút thoát
 
         // Tìm bài đăng theo Mã ID
         JobPost selectedPost = null;
@@ -162,31 +188,32 @@ public class ParentManager {
 
         // Hiện Menu thao tác cho Bài đăng vừa chọn
         System.out.println("\n--- BÀI ĐĂNG [" + selectedPost.getId() + "] ---");
-        System.out.println("1. Xem danh sách Gia sư đăng kí nhận lớp | 2. xóa bài đăng | 0.thoát");
+        System.out.println("1. Xem danh sách Gia sư đăng kí nhận lớp | 2. Xóa bài đăng | 0. Thoát");
         System.out.print("Chọn thao tác: ");
-        String choice = sc.nextLine();
+        String choice = sc.nextLine().trim();
 
         if (choice.equals("1")) {
             System.out.println(">> DANH SÁCH GIA SƯ ĐĂNG KÍ NHẬN LỚP:");
             if (selectedPost.getRegisteredTutorIds().isEmpty()) {
                 System.out.println("Hiện chưa có Gia sư nào đăng ký lớp này.");
             } else {
+                boolean foundTutor = false;
                 for (String tId : selectedPost.getRegisteredTutorIds()) {
                     for (User u : Database.getInstance().users) {
-                        if (u.getId().equals(tId) && u instanceof Tutor t) {
+                        if (u.getId().trim().equalsIgnoreCase(tId.trim()) && u instanceof Tutor t) {
                             System.out.printf("- Gia sư: %s | SĐT: %s | Uy tín: %.1f sao/%d lượt đánh giá\n",
-                                    t.getName(), t.getPhone(), t.getRating(),t.getReviewCount());
+                                    t.getName(), t.getPhone(), t.getRating(), t.getReviewCount());
+                            foundTutor = true;
                         }
                     }
                 }
+
             }
         }
         else if (choice.equals("2")) {
-
             Database.getInstance().posts.remove(selectedPost); // Xóa khỏi danh sách RAM
             Database.save(); // Lưu đè danh sách mới xuống ổ cứng
             System.out.println("Đã xóa bài đăng!");
-
         }
     }
 }

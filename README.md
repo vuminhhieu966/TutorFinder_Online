@@ -23,7 +23,7 @@ Là một ứng dụng Java Console được thiết kế để kết nối Ph�
 ### 3. Quản trị viên (Admin)
 * **Duyệt tài khoản:** Kiểm duyệt thông tin gia sư trước khi cho phép tham gia hệ thống.
 * **Kiểm duyệt bài đăng:** Đảm bảo các yêu cầu tìm gia sư của phụ huynh là hợp lệ.
-* **Quản lý người dùng:** Theo dõi danh sách toàn bộ tài khoản đang hoạt động trên hệ thống
+* **Quản lý người dùng:** Theo dõi danh sách toàn bộ tài khoản trên hệ thống
 * **Hỗ trợ tài khoản:** Đặt lại mật khẩu tài khoản báo quên hoặc mất quyền truy cập.
 
 ## Công nghệ sử dụng
