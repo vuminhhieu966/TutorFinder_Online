@@ -1,2 +1,0 @@
---- DANH SÁCH TÀI KHOẢN ---
-ID: admin1 | Tài khoản: admin | Mật khẩu: admin | Vai trò: ADMIN

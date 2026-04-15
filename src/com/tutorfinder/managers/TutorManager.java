@@ -97,4 +97,48 @@ public class TutorManager {
         }
         System.out.println("Lỗi: Không tìm thấy Mã bài đăng này!");
     }
+    // 4. TÍNH NĂNG MỚI: Sửa thông tin hồ sơ
+    public void editProfile(Tutor t) {
+        System.out.println("\n--- CẬP NHẬT HỒ SƠ GIA SƯ ---");
+        System.out.println("LƯU Ý: Sau khi cập nhật, tài khoản sẽ chuyển về trạng thái [CHỜ DUYỆT].");
+        System.out.println(" Nhấn (Enter/0) để giữ nguyên thông tin cũ.");
+
+        System.out.print("Họ Tên hiện tại (" + t.getName() + ") -> Mới: ");
+        String name = sc.nextLine();
+        if (name.equals("0")) return; // Nút thoát
+
+        System.out.print("SĐT hiện tại (" + t.getPhone() + ") -> Mới: ");
+        String phone = sc.nextLine();
+        if (phone.equals("0")) return;
+
+        System.out.print("Môn dạy hiện tại (" + t.getSubjects() + ") -> Mới: ");
+        String subjects = sc.nextLine();
+        if (subjects.equals("0")) return;
+
+        System.out.print("Lớp dạy hiện tại (" + t.getGrades() + ") -> Mới: ");
+        String grades = sc.nextLine();
+        if (grades.equals("0")) return;
+
+        System.out.print("Quận/Khu vực hiện tại (" + t.getArea() + ") -> Mới: ");
+        String area = sc.nextLine();
+        if (area.equals("0")) return;
+
+        System.out.print("\nBạn có chắc chắn muốn lưu thay đổi và gửi Admin duyệt lại? (y/n): ");
+        if (sc.nextLine().equalsIgnoreCase("y")) {
+            // Nếu người dùng có gõ chữ mới (không để trống), thì cập nhật
+            if (!name.isEmpty()) t.setName(name);
+            if (!phone.isEmpty()) t.setPhone(phone);
+            if (!subjects.isEmpty()) t.setSubjects(subjects);
+            if (!grades.isEmpty()) t.setGrades(grades);
+            if (!area.isEmpty()) t.setArea(area);
+
+            // Giáng cấp về trạng thái Chờ duyệt
+            t.setStatus(0);
+
+            Database.save(); // Lưu ngay xuống ổ cứng
+            System.out.println("Cập nhật thành công! Vui lòng chờ Admin duyệt lại hồ sơ nhé.");
+        } else {
+            System.out.println("Đã hủy cập nhật.");
+        }
+    }
 }

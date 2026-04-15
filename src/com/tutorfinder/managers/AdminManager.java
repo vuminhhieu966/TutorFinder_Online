@@ -73,4 +73,25 @@ public class AdminManager {
         }
         System.out.println("Lỗi: Không tìm thấy Mã Bài đăng!");
     }
+    // hiện tài khoản hệ thống
+    public void viewAllAccounts() {
+        System.out.println("\n--- TẤT CẢ TÀI KHOẢN TRÊN HỆ THỐNG ---");
+        // In tiêu đề bảng cho đẹp
+        System.out.printf("%-5s | %-15s | %-20s | %-15s\n", "ID", "Username", "Họ Tên", "Vai Trò");
+        System.out.println("------------------------------------------------------------");
+
+        for (User u : Database.getInstance().users) {
+            String role = "";
+            if (u instanceof Admin) role = "Admin";
+            else if (u instanceof Parent) role = "Phụ huynh";
+            else if (u instanceof Tutor) role = "Gia sư";
+
+            // In từng dòng dữ liệu căn lề cho thẳng cột
+            System.out.printf("%-5s | %-15s | %-20s | %-15s\n",
+                    u.getId(), u.getUsername(), u.getName(), role);
+        }
+
+        System.out.println("\nẤn Enter để quay lại Menu Admin.");
+        sc.nextLine(); // Dừng màn hình để Admin kịp xem
+    }
 }

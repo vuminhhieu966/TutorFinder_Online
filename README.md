@@ -53,7 +53,7 @@ src/com/tutorfinder/
 2. Chạy file `Main.java`.
 3. **Tài khoản Admin mặc định:** * Username: `admin`
     * Password: `admin`
-4. Dữ liệu sẽ được lưu tại file `tutor_v3.dat`. Danh sách tài khoản có thể xem trực tiếp tại `accounts.txt`.
+4. Dữ liệu sẽ được lưu tại file `data.dat`.
 
 ##  Lưu ý vận hành
 * Khi đăng ký, hệ thống sẽ tự động sinh ID (ví dụ: `p1`, `t1`, `jp1`).

@@ -9,11 +9,9 @@ public class Database implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // Tên file lưu trữ dữ liệu gốc (Nhị phân)
-    private static final String DATA_FILE = "tutor_v3.dat";
-    // Tên file báo cáo để người dùng có thể mở ra xem trực tiếp (Text)
-    private static final String ACCOUNTS_FILE = "accounts.txt";
+    private static final String DATA_FILE = "data.dat";
 
-    // 2 Danh sách chính chứa toàn bộ dữ liệu của hệ thống
+    // Danh sách chính chứa toàn bộ dữ liệu của hệ thống
     public List<User> users = new ArrayList<>();
     public List<JobPost> posts = new ArrayList<>();
 
@@ -22,7 +20,7 @@ public class Database implements Serializable {
     public int pIdx = 1; // Đếm phụ huynh
     public int jIdx = 1; // Đếm bài đăng
 
-    // Biến lưu trữ phiên bản duy nhất của Database (Mẫu thiết kế Singleton)
+    // Biến lưu trữ phiên bản duy nhất của Database
     private static Database instance;
 
     // Hàm khởi tạo (Chỉ chạy 1 lần khi chưa có file dữ liệu)
@@ -39,18 +37,16 @@ public class Database implements Serializable {
         return instance;
     }
 
-
     // CƠ CHẾ ĐỒNG BỘ HAI CỬA SỔ
-
 
     // Hàm LƯU dữ liệu xuống ổ cứng
     public static void save() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DATA_FILE))) {
-            oos.writeObject(instance); // Ghi toàn bộ dữ liệu vào file .dat
+            oos.writeObject(instance); // Ghi toàn bộ dữ liệu vào file
         } catch (Exception e) {
             System.out.println("Lỗi lưu file: " + e.getMessage());
         }
-        writeAccountFile(); // Tiện tay ghi luôn ra file txt để bạn đọc
+        // Đã gỡ bỏ lệnh writeAccountFile() ở đây
     }
 
     // Hàm ĐỌC dữ liệu từ ổ cứng lên RAM
@@ -75,15 +71,5 @@ public class Database implements Serializable {
         } catch (Exception e) {
             System.out.println("Lỗi đọc file!");
         }
-    }
-
-    // Hàm xuất dữ liệu ra file accounts.txt cho dễ nhìn
-    private static void writeAccountFile() {
-        try (PrintWriter pw = new PrintWriter(new FileWriter(ACCOUNTS_FILE))) {
-            pw.println("--- DANH SÁCH TÀI KHOẢN ---");
-            for (User u : instance.users) {
-                pw.println("ID: " + u.getId() + " | Tài khoản: " + u.getUsername() + " | Mật khẩu: " + u.getPassword() + " | Vai trò: " + u.getRole());
-            }
-        } catch (Exception e) { }
     }
 }

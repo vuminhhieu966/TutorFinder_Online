@@ -127,6 +127,7 @@ public class Main {
         System.out.println("1. Tìm bài đăng ");
         System.out.println("2. các bài đã đăng kí");
         System.out.println("3. xem đánh giá");
+        System.out.println("4. sửa thông tin");
         System.out.println("0. Đăng xuất");
         System.out.print("Chọn: ");
 
@@ -138,6 +139,7 @@ public class Main {
 
             case "2": tMan.manageMyRegistrations(t); break; // Gọi hàm mới tạo
             case "3": tMan.viewReviews(t); break;
+            case "4": tMan.editProfile(t); break;
             case "0": loggedUser = null; break;
         }
     }
@@ -146,12 +148,14 @@ public class Main {
         System.out.println("\n--- MENU ADMIN ---");
         System.out.println("1. Duyệt tài khoản Gia sư");
         System.out.println("2. Duyệt bài đăng");
+        System.out.println("3. Tài khoản trên hệ thống");
         System.out.println("0. Đăng xuất");
         System.out.print("Chọn: ");
 
         switch (sc.nextLine()) {
             case "1": aMan.manageTutors(); break;
             case "2": aMan.manageJobPosts(); break;
+            case "3": aMan.viewAllAccounts(); break;
             case "0": loggedUser = null; break;
         }
     }
