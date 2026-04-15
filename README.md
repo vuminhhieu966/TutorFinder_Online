@@ -10,23 +10,26 @@ Là một ứng dụng Java Console được thiết kế để kết nối Ph�
 * **Đăng bài tìm gia sư:** Tạo yêu cầu tìm gia sư .
 * **Quản lý bài đăng:** Xem danh sách gia sư đăng ký nhận lớp và có quyền xóa bài đăng khi đã tìm được người.
 * **Đánh giá:** đánh giá sao cho gia sư sau khi trải nghiệm dịch vụ.
+* **Bảo mật:** đổi mật khẩu
 
 ### 2. Gia sư (Tutor)
 * **Đăng ký hồ sơ:** 
 * **Tìm kiếm lớp học:** Theo dõi các bài đăng mới nhất từ phụ huynh đã được Admin duyệt.
 * **Đăng ký/Hủy nhận lớp:** Đăng ký dạy các lớp phù hợp hoặc hủy đăng ký.
 * **Xem thống kê đánh giá:** Theo dõi số sao trung bình và lượt đánh giá từ phụ huynh.
+* **Sửa hồ sơ:** Thay đổi hồ sơ xong thì phải chờ admin duyệt
+* **Bảo mật:** đổi mật khẩu
 
 ### 3. Quản trị viên (Admin)
 * **Duyệt tài khoản:** Kiểm duyệt thông tin gia sư trước khi cho phép tham gia hệ thống.
 * **Kiểm duyệt bài đăng:** Đảm bảo các yêu cầu tìm gia sư của phụ huynh là hợp lệ.
-* **Khóa tài khoản:** Xử lý các trường hợp vi phạm hoặc thông tin giả mạo.
+* **Quản lý người dùng:** Theo dõi danh sách toàn bộ tài khoản đang hoạt động trên hệ thống
+* **Hỗ trợ tài khoản:** Đặt lại mật khẩu tài khoản báo quên hoặc mất quyền truy cập.
 
 ## Công nghệ sử dụng
 * **Ngôn ngữ:** Java (JDK 8+).
 * **Kiến trúc:** Object-Oriented Programming (OOP) chia lớp Manager xử lý nghiệp vụ riêng biệt.
 * **Lưu trữ dữ liệu:** `Serializable`: Ghi/Đọc file nhị phân (`.dat`) để lưu trạng thái hệ thống.
-    * `PrintWriter`: Xuất báo cáo danh sách tài khoản ra file văn bản (`.txt`).
 * **Cơ chế đồng bộ:** Tự động nạp dữ liệu (Load) liên tục giúp chạy song song nhiều cửa sổ Console cùng lúc.
 
 ## Cấu trúc dự án

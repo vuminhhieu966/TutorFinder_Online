@@ -77,19 +77,49 @@ public class ParentManager {
 
     // 2. Chức năng Đăng bài
     public void createJobPost(Parent p) {
-        System.out.println("\n--- ĐĂNG BÀI TÌM GIA SƯ (Nhập 0 để Hủy) ---");
-        System.out.print("Môn: "); String sub = sc.nextLine();
+        System.out.println("\n--- ĐĂNG BÀI TÌM GIA SƯ ---");
 
-        if (sub.equals("0")) return;
+        System.out.print("Môn: ");
+        String sub = sc.nextLine();
+        if (sub.equals("0") || sub.isEmpty()) return;   // nút thoát
 
-        System.out.print("Lớp: "); String gr = sc.nextLine();
-        System.out.print("Khu vực: "); String ar = sc.nextLine();
-        System.out.print("Giá tiền/1 buổi học (VNĐ): "); double pr = Double.parseDouble(sc.nextLine());
+        System.out.print("Lớp: ");
+        String gr = sc.nextLine();
+        if (gr.equals("0") || gr.isEmpty()) return ;
 
+        System.out.print("Khu vực: ");
+        String ar = sc.nextLine();
+        if (ar.equals("0") || ar.isEmpty()) return;
+
+        double pr = 0;
+        while (true) {
+            try {
+                System.out.print("Giá tiền/1 buổi học (VNĐ): ");
+                String inputPrice = sc.nextLine();
+
+                if (inputPrice.equals("0") || inputPrice.isEmpty()) return;
+
+                // ép kiểu từ Chữ sang Số thập phân
+                pr = Double.parseDouble(inputPrice);
+
+                if (pr < 0) {
+                    System.out.println("Lỗi: Giá tiền không được là số âm. Vui lòng nhập lại!");
+                    continue;
+                }
+
+                break; // Nếu code chạy được đến đây nghĩa là nhập đúng số -> phá vòng lặp đi tiếp
+
+            } catch (NumberFormatException e) {
+                // Nếu ép kiểu thất bại (người dùng gõ chữ), nó sẽ rớt xuống đây thay vì sập App
+                System.out.println("Lỗi: Vui lòng CHỈ NHẬP SỐ!");
+            }
+        }
+
+        // Tạo bài đăng và lưu Database
         String jpId = "jp" + (Database.getInstance().jIdx++); // mã bài đăng
         Database.getInstance().posts.add(new JobPost(jpId, p.getId(), sub, gr, ar, pr));
-        Database.save();
-        System.out.println("tạo bài đăng thành công, chờ admin duyệt.");
+        Database.save(); // Lưu ngay xuống file
+        System.out.println("tạo bài đăng thành công! Vui lòng chờ Admin duyệt.");
     }
 
     // 3. Chức năng Quản lý bài đăng

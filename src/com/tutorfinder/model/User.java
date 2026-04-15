@@ -29,6 +29,7 @@ public abstract class User implements Serializable {
     // Setter
     public void setName(String name) { this.name = name; }
     public void setPhone(String phone) { this.phone = phone; }
+    public void setPassword(String password) {this.password =password;}
 
     // Hàm trừu tượng
     public abstract String getRole();

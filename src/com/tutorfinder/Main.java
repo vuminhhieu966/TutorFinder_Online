@@ -109,6 +109,7 @@ public class Main {
         System.out.println("1. Tìm Gia sư");
         System.out.println("2. Đăng bài tìm gia sư");
         System.out.println("3. Các bài đăng của tôi");
+        System.out.println("4. Đổi mật khẩu ");
         System.out.println("0. Đăng xuất");
         System.out.print("Chọn: ");
 
@@ -116,6 +117,7 @@ public class Main {
             case "1": pMan.findTutors(); break;
             case "2": pMan.createJobPost((Parent)loggedUser); break;
             case "3": pMan.manageMyPosts((Parent)loggedUser); break;
+            case "4": auth.changePassword(loggedUser); break;
             case "0": loggedUser = null; break; // Xóa session = Đăng xuất
         }
     }
@@ -127,7 +129,8 @@ public class Main {
         System.out.println("1. Tìm bài đăng ");
         System.out.println("2. các bài đã đăng kí");
         System.out.println("3. xem đánh giá");
-        System.out.println("4. sửa thông tin");
+        System.out.println("4. sửa hồ sơ");
+        System.out.println("5. Đổi mật khẩu");
         System.out.println("0. Đăng xuất");
         System.out.print("Chọn: ");
 
@@ -140,6 +143,7 @@ public class Main {
             case "2": tMan.manageMyRegistrations(t); break; // Gọi hàm mới tạo
             case "3": tMan.viewReviews(t); break;
             case "4": tMan.editProfile(t); break;
+            case "5": auth.changePassword(loggedUser); break;
             case "0": loggedUser = null; break;
         }
     }
@@ -149,6 +153,7 @@ public class Main {
         System.out.println("1. Duyệt tài khoản Gia sư");
         System.out.println("2. Duyệt bài đăng");
         System.out.println("3. Tài khoản trên hệ thống");
+        System.out.println("4. cấp lại mật khẩu cho người dùng");
         System.out.println("0. Đăng xuất");
         System.out.print("Chọn: ");
 
@@ -156,6 +161,7 @@ public class Main {
             case "1": aMan.manageTutors(); break;
             case "2": aMan.manageJobPosts(); break;
             case "3": aMan.viewAllAccounts(); break;
+            case "4": aMan.resetUserPassword(); break;
             case "0": loggedUser = null; break;
         }
     }
