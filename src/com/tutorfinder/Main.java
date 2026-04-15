@@ -18,6 +18,15 @@ public class Main {
     public static void main(String[] args) {
         while (true) {
             Database.load(); // LOAD: Để thấy thay đổi từ cửa sổ khác
+            // Đồng bộ lại loggedUser với phiên bản mới nhất từ CSDL
+            if (loggedUser != null) {
+                for (User u : Database.getInstance().users) {
+                    if (u.getId().equals(loggedUser.getId())) {
+                        loggedUser = u; // Cập nhật lại chính mình
+                        break;
+                    }
+                }
+            }
 
             if (loggedUser == null) {
                 System.out.println("\n=== TÌM GIA SƯ ONLINE ===");
