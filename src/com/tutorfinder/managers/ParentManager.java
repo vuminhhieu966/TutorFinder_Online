@@ -11,6 +11,7 @@ public class ParentManager {
         this.sc = sc;
     }
 
+    // ========== 1. TÌM KIẾM GIA SƯ
     public void findTutors() {
         System.out.println("\n--- TÌM KIẾM GIA SƯ (Nhập 0 để thoát) ---");
         String subject = prompt("- Môn học: ");
@@ -44,6 +45,7 @@ public class ParentManager {
         System.out.println("\n1.Thông tin chi tiết | 2. Đánh giá Gia sư | 0. Quay lại");
         String action = prompt("Chọn thao tác: ");
 
+        // Chọn xem chi tiết hoặc đánh giá gia sư
         if (action.equals("1")) {
             String tutorId = prompt("Nhập Mã ID Gia sư (hoặc Enter để thoát): ");
             if (tutorId.isEmpty()) return;
@@ -72,6 +74,7 @@ public class ParentManager {
         }
     }
 
+    // ========== 2. TẠO BÀI ĐĂNG TÌM GIA SƯ ========== 
     public void createJobPost(Parent parent) {
         System.out.println("\n--- ĐĂNG BÀI TÌM GIA SƯ (Nhập 0 để Hủy) ---");
         String subject = prompt("Môn: ");
@@ -88,6 +91,7 @@ public class ParentManager {
         System.out.println("tạo bài đăng thành công, chờ admin duyệt.");
     }
 
+    // ========== 3. QUẢN LÝ BÀI ĐĂNG CỦA PHỤ HUYNH ==========
     public void manageMyPosts(Parent parent) {
         System.out.println("\n--- CÁC BÀI ĐĂNG CỦA TÔI ---");
         boolean hasPost = false;
@@ -120,6 +124,8 @@ public class ParentManager {
         System.out.println("1. Xem danh sách Gia sư đăng kí nhận lớp | 2. xóa bài đăng | 0.thoát");
         String action = prompt("Chọn thao tác: ");
 
+        // Xem danh sách gia sư đã đăng ký hoặc xóa bài đăng
+
         if (action.equals("1")) {
             System.out.println(">> DANH SÁCH GIA SƯ ĐĂNG KÍ NHẬN LỚP:");
             if (selectedPost.getRegisteredTutorIds().isEmpty()) {
@@ -145,6 +151,7 @@ public class ParentManager {
         return sc.nextLine();
     }
 
+    // Helper: kiểm tra giá trị nhập có phải nút "0" để thoát không
     private boolean isCancel(String value) {
         return value != null && value.equals("0");
     }
