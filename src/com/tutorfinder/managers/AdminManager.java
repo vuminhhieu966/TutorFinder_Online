@@ -78,9 +78,11 @@ public class AdminManager {
         System.out.println("\n--- TẤT CẢ TÀI KHOẢN TRÊN HỆ THỐNG ---");
 
         for (User u : Database.getInstance().users) {
+            if (u instanceof Admin) {
+                continue;
+            }
             String role = "";
-            if (u instanceof Admin) role = "Admin";
-            else if (u instanceof Parent) role = "Phụ huynh";
+            if (u instanceof Parent) role = "Phụ huynh";
             else if (u instanceof Tutor) role = "Gia sư";
 
             System.out.printf("Id: %s | Username: %s | SĐT: %s | Vai trò: %s \n",
