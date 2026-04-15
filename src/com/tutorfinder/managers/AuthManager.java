@@ -65,11 +65,11 @@ public class AuthManager {
             return;
         }
 
-        System.out.print("Nhập mật khẩu MỚI: ");
+        System.out.print("Nhập mật khẩu mới: ");
         String newPass = sc.nextLine().trim(); // Thêm trim() dọn rác
         if (newPass.equals("0") || newPass.isEmpty()) return;
 
-        System.out.print("Xác nhận lại mật khẩu MỚI: ");
+        System.out.print("Xác nhận lại mật khẩu mới: ");
         String confirmPass = sc.nextLine().trim(); // Thêm trim() dọn rác
 
         if (!newPass.equals(confirmPass)) {
