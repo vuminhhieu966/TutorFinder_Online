@@ -27,9 +27,9 @@ public class AdminManager {
         }
 
         System.out.println("\nHD: Nhập ID để Duyệt: ");
-        String input = sc.nextLine(); // input lúc này chính là ID luôn
+        String input = sc.nextLine(); // input lúc này chính là ID
 
-        if (input.isEmpty() || input.equals("0")) return; // Nút
+        if (input.isEmpty() || input.equals("0")) return; // Nút thoát
 
         for (User u : Database.getInstance().users) {
             // so sanhs input với ID của User
@@ -75,27 +75,53 @@ public class AdminManager {
         }
         System.out.println("Lỗi: Không tìm thấy Mã Bài đăng!");
     }
-    // hiện tài khoản hệ thống
+    // Hiện tài khoản hệ thống
     public void viewAllAccounts() {
         Database.load();
-        System.out.println("\n--- TẤT CẢ TÀI KHOẢN TRÊN HỆ THỐNG ---");
+
+        // 1. Hiển thị Mini Menu chọn bộ lọc
+        System.out.println("\n--- BỘ LỌC TÌM KIẾM TÀI KHOẢN ---");
+        System.out.println("1. xem tài khoản Gia sư");
+        System.out.println("2. xem tài khoản Phụ huynh");
+        System.out.println("3. Xem Tất cả");
+        System.out.print("Chọn : ");
+
+        String filterChoice = sc.nextLine();
+
+        System.out.println("\n--- DANH SÁCH TÀI KHOẢN ---");
+        boolean hasData = false;
 
         for (User u : Database.getInstance().users) {
             if (u instanceof Admin) {
                 continue;
             }
+
+            if (filterChoice.equals("1") && !(u instanceof Tutor)) {
+                continue;
+            }
+
+            if (filterChoice.equals("2") && !(u instanceof Parent)) {
+                continue;
+            }
+
             String role = "";
             if (u instanceof Parent) role = "Phụ huynh";
             else if (u instanceof Tutor) role = "Gia sư";
 
             System.out.printf("Id: %s | Username: %s | SĐT: %s | Vai trò: %s \n",
                     u.getId(), u.getUsername(), u.getPhone(), role);
+
+            hasData = true; // Đánh dấu là đã tìm thấy ít nhất 1 người
+        }
+
+        // Nếu chạy hết danh sách mà không có ai
+        if (!hasData) {
+            System.out.println("(Không có dữ liệu phù hợp với bộ lọc hiện tại!)");
         }
 
         System.out.println("\nẤn Enter để quay lại Menu Admin.");
-        sc.nextLine(); // Dừng màn hình để Admin kịp xem
+        sc.nextLine(); // Dừng màn hình
     }
-
     // Tính năng: Đặt lại mật khẩu cho người dùng
     public void resetUserPassword() {
         Database.load();
@@ -103,13 +129,13 @@ public class AdminManager {
         System.out.print("Nhập ID tài khoản cần Reset (Enter để quay lại): ");
         String targetId = sc.nextLine();
 
-        if (targetId.trim().isEmpty()) return; // Nút thoát
+        if (targetId.trim().isEmpty() || targetId.trim().equals("0")) return; // Nút thoát
 
         for (User u : Database.getInstance().users) {
             if (u.getId().equalsIgnoreCase(targetId)) {
                 // Bảo mật: Không cho phép reset pass admin
                 if (u instanceof Admin) {
-                    System.out.println("Lỗi: Không được phép can thiệp vào tài khoản Admin khác!");
+                    System.out.println("Lỗi: không tìm thấy id");
                     return;
                 }
 

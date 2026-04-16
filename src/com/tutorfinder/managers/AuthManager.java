@@ -23,7 +23,7 @@ public class AuthManager {
         Database.load();
         for (User u : Database.getInstance().users) {
             if (u.getUsername().equals(username) && u.getPassword().equals(password)) {
-                return u; // Trả về thông tin người dùng nếu đúng
+                return u;
             }
         }
         return null; // Trả về null nếu sai
@@ -77,7 +77,7 @@ public class AuthManager {
             return;
         }
 
-        // --- BƯỚC QUAN TRỌNG: TÌM VÀ SỬA ĐÚNG NGƯỜI TRONG DATABASE ---
+        //TÌM VÀ SỬA ĐÚNG NGƯỜI TRONG DATABASE
         boolean isUpdated = false;
         for (User dbUser : Database.getInstance().users) {
             // Dò đúng ID của người đang đăng nhập

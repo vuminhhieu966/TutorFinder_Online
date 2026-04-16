@@ -17,12 +17,11 @@ public class Main {
 
     public static void main(String[] args) {
         while (true) {
-            Database.load(); // LOAD: Để thấy thay đổi từ cửa sổ khác
-            // Đồng bộ lại loggedUser với phiên bản mới nhất từ CSDL
+            Database.load(); // LOAD
             if (loggedUser != null) {
                 for (User u : Database.getInstance().users) {
                     if (u.getId().equals(loggedUser.getId())) {
-                        loggedUser = u; // Cập nhật lại chính mình
+                        loggedUser = u; // Cập nhật lại chính user
                         break;
                     }
                 }
@@ -42,7 +41,6 @@ public class Main {
                     break;
                 }
             } else {
-                // Phân quyền Menu dựa trên class của User
                 if (loggedUser instanceof Parent) showParent();
                 else if (loggedUser instanceof Tutor) showTutor();
                 else if (loggedUser instanceof Admin) showAdmin();
@@ -76,7 +74,7 @@ public class Main {
         System.out.print("Bạn là ai? (1. Phụ huynh | 2. Gia sư): ");
         String r = sc.nextLine();
 
-        // Nút thoát hiểm ngay từ bước chọn vai trò
+        // Nút thoát
         if (r.equals("0") || r.isEmpty()) return;
         if (!r.equals("1") && !r.equals("2")) {
             System.out.println("Lựa chọn không hợp lệ!");

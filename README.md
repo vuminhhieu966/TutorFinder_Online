@@ -29,7 +29,7 @@ Là một ứng dụng Java Console được thiết kế để kết nối Ph�
 ## Công nghệ sử dụng
 * **Ngôn ngữ:** Java (JDK 8+).
 * **Kiến trúc:** Object-Oriented Programming (OOP) chia lớp Manager xử lý nghiệp vụ riêng biệt.
-* **Lưu trữ dữ liệu:** `Serializable`: Ghi/Đọc file nhị phân (`.dat`) để lưu trạng thái hệ thống.
+* **Lưu trữ dữ liệu:** `Serializable`: Ghi/Đọc file nhị phân (`.dat`) .
 * **Cơ chế đồng bộ:** Tự động nạp dữ liệu (Load) liên tục giúp chạy song song nhiều cửa sổ Console cùng lúc.
 
 ## Cấu trúc dự án

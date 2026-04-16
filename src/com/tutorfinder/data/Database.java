@@ -23,7 +23,7 @@ public class Database implements Serializable {
     // Biến lưu trữ phiên bản duy nhất của Database
     private static Database instance;
 
-    // Hàm khởi tạo (Chỉ chạy 1 lần khi chưa có file dữ liệu)
+    // Hàm khởi tạo
     private Database() {
         // Tự động tạo sẵn 1 tài khoản Admin
         users.add(new Admin("admin1", "admin", "admin"));
