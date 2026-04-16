@@ -5,7 +5,8 @@ import com.tutorfinder.managers.*;
 import com.tutorfinder.model.*;
 import java.util.Scanner;
 
-public class Main {
+public class
+Main {
     static Scanner sc = new Scanner(System.in);
     static User loggedUser = null; // Lưu tài khoản đang đăng nhập
 
